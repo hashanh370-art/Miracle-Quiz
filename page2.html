@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Miracle Quiz - Couple Setup ❤️</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            background:
+                radial-gradient(
+                    circle at top,
+                    #3a0008 0%,
+                    #130004 35%,
+                    #050505 70%
+                );
+        }
+
+        .page {
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-heart {
+            font-size: 45px;
+            filter: drop-shadow(0 0 15px #ff163f);
+        }
+
+        .header h1 {
+            margin: 10px 0;
+            font-size: 40px;
+        }
+
+        .header h1 span {
+            color: #ff244f;
+        }
+
+        .brand-name {
+            color: #c9c9c9;
+            font-size: 13px;
+            letter-spacing: 1.5px;
+        }
+
+        .status-card,
+        .setup-card {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 25px;
+            padding: 25px;
+
+            background: rgba(18, 10, 12, 0.94);
+
+            border: 1px solid rgba(255, 45, 80, 0.25);
+            border-radius: 22px;
+
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.45);
+        }
+
+        .status-card {
+            text-align: center;
+        }
+
+        #connectionStatus {
+            color: #ff496b;
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .couple-code {
+            margin-top: 10px;
+            color: #aaa;
+        }
+
+        .partners {
+            width: 100%;
+            max-width: 900px;
+
+            margin: 0 auto 25px;
+
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+
+            gap: 20px;
+        }
+
+        .partner-card {
+            text-align: center;
+
+            padding: 22px;
+
+            background: rgba(18, 10, 12, 0.94);
+
+            border: 1px solid rgba(255, 45, 80, 0.25);
+            border-radius: 18px;
+        }
+
+        .connected {
+            color: #ff496b;
+            font-weight: bold;
+        }
+
+        .section-title {
+            margin-top: 25px;
+            margin-bottom: 12px;
+
+            font-weight: bold;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 12px;
+        }
+
+        .gender-options {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .option {
+            padding: 15px;
+
+            text-align: center;
+
+            background: #10090b;
+
+            border: 1px solid #4b272f;
+            border-radius: 12px;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            border-color: #ff244f;
+        }
+
+        .option.selected {
+            background: #351018;
+
+            border-color: #ff244f;
+
+            box-shadow:
+                0 0 15px rgba(255, 36, 79, 0.2);
+        }
+
+        label {
+            display: block;
+
+            margin: 20px 0 8px;
+
+            color: #ddd;
+        }
+
+        input {
+            width: 100%;
+
+            padding: 15px;
+
+            border-radius: 12px;
+            border: 1px solid #3a292d;
+
+            background: #0d0a0b;
+
+            color: white;
+
+            outline: none;
+
+            font-size: 16px;
+        }
+
+        input:focus {
+            border-color: #ff244f;
+
+            box-shadow:
+                0 0 0 3px rgba(255, 36, 79, 0.1);
+        }
+
+        .continue-btn {
+            width: 100%;
+
+            margin-top: 28px;
+
+            padding: 16px;
+
+            border: none;
+            border-radius: 12px;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #d90032,
+                    #ff3159
+                );
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .continue-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 700px) {
+
+            .partners {
+                grid-template-columns: 1fr;
+            }
+
+            .options {
+                grid-template-columns: 1fr;
+            }
+
+            .gender-options {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page">
+
+        <div class="header">
+
+            <div class="logo-heart">
+                ❤️
+            </div>
+
+            <h1>
+                Miracle <span>Quiz</span>
+            </h1>
+
+            <div class="brand-name">
+                by Miracle Heart
+            </div>
+
+        </div>
+
+
+        <div class="status-card">
+
+            <div id="connectionStatus">
+                Checking connection...
+            </div>
+
+            <div
+                id="coupleCodeText"
+                class="couple-code">
+            </div>
+
+        </div>
+
+
+        <div class="partners">
+
+            <div class="partner-card">
+
+                <h3>
+                    Partner 1 ❤️
+                </h3>
+
+                <div id="partner1Status">
+                    Checking...
+                </div>
+
+            </div>
+
+
+            <div class="partner-card">
+
+                <h3>
+                    Partner 2 ❤️
+                </h3>
+
+                <div id="partner2Status">
+                    Checking...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="setup-card">
+
+            <h2>
+                Couple Profile Setup ❤️
+            </h2>
+
+
+            <div class="section-title">
+                Choose your language
+            </div>
+
+
+            <div class="options">
+
+                <div
+                    class="option language-option"
+                    data-value="English">
+                    English
+                </div>
+
+                <div
+                    class="option language-option"
+                    data-value="தமிழ்">
+                    தமிழ்
+                </div>
+
+                <div
+                    class="option language-option"
+                    data-value="සිංහල">
+                    සිංහල
+                </div>
+
+            </div>
+
+
+            <div class="section-title">
+                Select your gender
+            </div>
+
+
+            <div class="options gender-options">
+
+                <div
+                    class="option gender-option"
+                    data-value="Male">
+                    Male
+                </div>
+
+                <div
+                    class="option gender-option"
+                    data-value="Female">
+                    Female
+                </div>
+
+            </div>
+
+
+            <label>
+                Male Partner Name
+            </label>
+
+            <input
+                id="malePartnerName"
+                type="text"
+                placeholder="Enter male partner name"
+            >
+
+
+            <label>
+                Female Partner Name
+            </label>
+
+            <input
+                id="femalePartnerName"
+                type="text"
+                placeholder="Enter female partner name"
+            >
+
+
+            <button
+                id="continueBtn"
+                class="continue-btn"
+                disabled>
+                Continue ❤️
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const coupleId =
+            localStorage.getItem("coupleId");
+
+        const coupleCode =
+            localStorage.getItem("coupleCode");
+
+        let partnerId =
+            Number(localStorage.getItem("partnerId"));
+
+        let selectedLanguage = "";
+        let selectedGender = "";
+
+
+        if (!coupleId) {
+
+            alert(
+                "Couple information not found. " +
+                "Please create or join a couple first."
+            );
+
+            window.location.href = "/";
+        }
+
+
+        if (!partnerId) {
+            partnerId = 2;
+        }
+
+
+        if (coupleCode) {
+
+            document.getElementById(
+                "coupleCodeText"
+            ).textContent =
+                "Couple Code: " + coupleCode;
+        }
+
+
+        async function loadCoupleStatus() {
+
+            try {
+
+                const response = await fetch(
+                    "/api/couples/" +
+                    encodeURIComponent(coupleId) +
+                    "/status"
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    document.getElementById(
+                        "connectionStatus"
+                    ).textContent =
+                        data.message ||
+                        "Could not load couple status.";
+
+                    return;
+                }
+
+
+                document.getElementById(
+                    "connectionStatus"
+                ).textContent =
+                    data.status;
+
+
+                document.getElementById(
+                    "partner1Status"
+                ).innerHTML =
+                    data.partner1.connected
+                        ? '<span class="connected">Connected ❤️</span>'
+                        : "Waiting...";
+
+
+                document.getElementById(
+                    "partner2Status"
+                ).innerHTML =
+                    data.partner2.connected
+                        ? '<span class="connected">Connected ❤️</span>'
+                        : "Waiting...";
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.getElementById(
+                    "connectionStatus"
+                ).textContent =
+                    "ERROR: " + error.message;
+            }
+        }
+
+
+        document
+            .querySelectorAll(".language-option")
+            .forEach((option) => {
+
+                option.addEventListener(
+                    "click",
+                    function () {
+
+                        document
+                            .querySelectorAll(
+                                ".language-option"
+                            )
+                            .forEach((item) => {
+
+                                item.classList.remove(
+                                    "selected"
+                                );
+
+                            });
+
+
+                        this.classList.add(
+                            "selected"
+                        );
+
+
+                        selectedLanguage =
+                            this.dataset.value;
+
+
+                        checkForm();
+                    }
+                );
+            });
+
+
+        document
+            .querySelectorAll(".gender-option")
+            .forEach((option) => {
+
+                option.addEventListener(
+                    "click",
+                    function () {
+
+                        document
+                            .querySelectorAll(
+                                ".gender-option"
+                            )
+                            .forEach((item) => {
+
+                                item.classList.remove(
+                                    "selected"
+                                );
+
+                            });
+
+
+                        this.classList.add(
+                            "selected"
+                        );
+
+
+                        selectedGender =
+                            this.dataset.value;
+
+
+                        checkForm();
+                    }
+                );
+            });
+
+
+        const malePartnerName =
+            document.getElementById(
+                "malePartnerName"
+            );
+
+
+        const femalePartnerName =
+            document.getElementById(
+                "femalePartnerName"
+            );
+
+
+        const continueBtn =
+            document.getElementById(
+                "continueBtn"
+            );
+
+
+        malePartnerName.addEventListener(
+            "input",
+            checkForm
+        );
+
+
+        femalePartnerName.addEventListener(
+            "input",
+            checkForm
+        );
+
+
+        function checkForm() {
+
+            const maleName =
+                malePartnerName.value.trim();
+
+            const femaleName =
+                femalePartnerName.value.trim();
+
+
+            continueBtn.disabled = !(
+                selectedLanguage &&
+                selectedGender &&
+                maleName &&
+                femaleName
+            );
+        }
+
+
+        continueBtn.addEventListener(
+            "click",
+            saveProfile
+        );
+
+
+        async function saveProfile() {
+
+            const maleName =
+                malePartnerName.value.trim();
+
+            const femaleName =
+                femalePartnerName.value.trim();
+
+
+            if (
+                !selectedLanguage ||
+                !selectedGender ||
+                !maleName ||
+                !femaleName
+            ) {
+
+                alert(
+                    "Please complete all fields."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                continueBtn.disabled = true;
+
+                continueBtn.textContent =
+                    "Saving...";
+
+
+                const response = await fetch(
+                    "/api/couples/" +
+                    encodeURIComponent(coupleId) +
+                    "/profile",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            partnerId: partnerId,
+                            language: selectedLanguage,
+                            gender: selectedGender,
+                            malePartnerName: maleName,
+                            femalePartnerName: femaleName
+                        })
+                    }
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    alert(
+                        data.message ||
+                        "Could not save profile."
+                    );
+
+                    continueBtn.disabled = false;
+
+                    continueBtn.textContent =
+                        "Continue ❤️";
+
+                    return;
+                }
+
+
+                localStorage.setItem(
+                    "language",
+                    selectedLanguage
+                );
+
+
+                localStorage.setItem(
+                    "gender",
+                    selectedGender
+                );
+
+
+                localStorage.setItem(
+                    "malePartnerName",
+                    maleName
+                );
+
+
+                localStorage.setItem(
+                    "femalePartnerName",
+                    femaleName
+                );
+
+
+                alert(
+                    "Partner profile saved successfully ❤️"
+                );
+
+
+                window.location.href = "page3.html";
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                alert(
+                    "Could not connect to the server."
+                );
+
+
+              
+            }
+        }
+
+
+        loadCoupleStatus();
+
+
+        setInterval(
+            loadCoupleStatus,
+            3000
+        );
+
+    </script>
+
+</body>
+</html>
