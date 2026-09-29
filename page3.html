@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Miracle Quiz ❤️</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #42000b 0%,
+                    #170005 35%,
+                    #050505 72%
+                );
+
+            overflow-x: hidden;
+        }
+
+        .page {
+            min-height: 100vh;
+            padding: 35px 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            text-align: center;
+        }
+
+        /* LOGO */
+
+        .logo-heart {
+            font-size: 48px;
+            margin-bottom: 8px;
+
+            filter:
+                drop-shadow(
+                    0 0 18px #ff1748
+                );
+
+            animation:
+                heartbeat 1.8s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.12);
+            }
+        }
+
+        .logo {
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .logo span {
+            color: #ff3159;
+        }
+
+        .brand {
+            color: #aaa;
+            font-size: 13px;
+            letter-spacing: 2px;
+            margin-bottom: 35px;
+        }
+
+        /* MAIN CARD */
+
+        .main-card {
+            position: relative;
+            overflow: hidden;
+
+            padding: 38px 30px;
+
+            background:
+                rgba(18, 7, 10, 0.94);
+
+            border:
+                1px solid rgba(
+                    255,
+                    49,
+                    89,
+                    0.30
+                );
+
+            border-radius: 26px;
+
+            box-shadow:
+                0 20px 70px
+                rgba(0, 0, 0, 0.60),
+                0 0 35px
+                rgba(255, 20, 60, 0.08);
+
+            animation:
+                cardIn 0.8s ease;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform:
+                    translateY(25px);
+            }
+
+            to {
+                opacity: 1;
+                transform:
+                    translateY(0);
+            }
+        }
+
+        /* COUPLE */
+
+        .couple-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+
+            margin-bottom: 30px;
+        }
+
+        .partner {
+            flex: 1;
+            max-width: 220px;
+        }
+
+        .avatar {
+            width: 105px;
+            height: 105px;
+
+            margin:
+                0 auto 13px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 52px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #2c0b12,
+                    #100508
+                );
+
+            border:
+                2px solid
+                rgba(255, 50, 90, 0.55);
+
+            box-shadow:
+                0 0 25px
+                rgba(255, 30, 70, 0.25);
+        }
+
+        .partner-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .partner-type {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* CENTER HEART */
+
+        .heart-connect {
+            font-size: 42px;
+
+            filter:
+                drop-shadow(
+                    0 0 15px #ff1748
+                );
+
+            animation:
+                heartGlow 1.6s infinite alternate;
+        }
+
+        @keyframes heartGlow {
+            from {
+                transform: scale(0.95);
+                opacity: 0.75;
+            }
+
+            to {
+                transform: scale(1.15);
+                opacity: 1;
+            }
+        }
+
+        /* TEXT */
+
+        .congratulations {
+            color: #ff496b;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 34px;
+            line-height: 1.25;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            max-width: 620px;
+            margin: 0 auto;
+
+            color: #c9c9c9;
+
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .wish-box {
+            max-width: 650px;
+
+            margin:
+                25px auto 0;
+
+            padding: 18px;
+
+            border-radius: 16px;
+
+            background:
+                rgba(255, 35, 75, 0.06);
+
+            border:
+                1px solid
+                rgba(255, 50, 90, 0.18);
+
+            color: #ddd;
+
+            line-height: 1.7;
+        }
+
+        /* BUTTON */
+
+        .start-btn {
+            width: 100%;
+            max-width: 420px;
+
+            margin-top: 30px;
+            padding: 17px 25px;
+
+            border: none;
+            border-radius: 14px;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #c9002f,
+                    #ff3159
+                );
+
+            font-size: 17px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 10px 30px
+                rgba(255, 25, 70, 0.25);
+
+            transition:
+                transform 0.25s,
+                box-shadow 0.25s;
+        }
+
+        .start-btn:hover {
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                0 15px 38px
+                rgba(255, 25, 70, 0.38);
+        }
+
+        /* FLOATING HEARTS */
+
+        .floating-heart {
+            position: fixed;
+            bottom: -30px;
+
+            color:
+                rgba(255, 45, 80, 0.25);
+
+            pointer-events: none;
+
+            animation:
+                floatHeart linear infinite;
+        }
+
+        @keyframes floatHeart {
+            from {
+                transform:
+                    translateY(0)
+                    rotate(0deg);
+
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            to {
+                transform:
+                    translateY(-110vh)
+                    rotate(25deg);
+
+                opacity: 0;
+            }
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 650px) {
+
+            .page {
+                padding: 22px 14px;
+            }
+
+            .main-card {
+                padding: 28px 16px;
+            }
+
+            .logo {
+                font-size: 32px;
+            }
+
+            .couple-area {
+                gap: 12px;
+            }
+
+            .avatar {
+                width: 82px;
+                height: 82px;
+                font-size: 40px;
+            }
+
+            .heart-connect {
+                font-size: 30px;
+            }
+
+            .partner-name {
+                font-size: 16px;
+            }
+
+            h1 {
+                font-size: 27px;
+            }
+
+            .subtitle {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page">
+
+        <div class="container">
+
+            <div class="logo-heart">
+                ❤️
+            </div>
+
+            <div class="logo">
+                Miracle <span>Quiz</span>
+            </div>
+
+            <div class="brand">
+                BY MIRACLE HEART
+            </div>
+
+            <div class="main-card">
+
+                <div class="couple-area">
+
+                    <div class="partner">
+
+                        <div class="avatar">
+                            👨
+                        </div>
+
+                        <div
+                            class="partner-name"
+                            id="maleName">
+                            Male Partner
+                        </div>
+
+                        <div
+                            class="partner-type"
+                            id="maleLabel">
+                            Male Partner
+                        </div>
+
+                    </div>
+
+                    <div class="heart-connect">
+                        ❤️
+                    </div>
+
+                    <div class="partner">
+
+                        <div class="avatar">
+                            👩
+                        </div>
+
+                        <div
+                            class="partner-name"
+                            id="femaleName">
+                            Female Partner
+                        </div>
+
+                        <div
+                            class="partner-type"
+                            id="femaleLabel">
+                            Female Partner
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="congratulations"
+                    id="congratulations">
+
+                    CONGRATULATIONS ❤️
+
+                </div>
+
+                <h1 id="headline">
+                    How well do you know each other?
+                </h1>
+
+                <div
+                    class="subtitle"
+                    id="subtitle">
+
+                    Your Miracle Quiz journey
+                    is about to begin.
+
+                </div>
+
+                <div
+                    class="wish-box"
+                    id="wish">
+
+                    Answer the questions with love
+                    and honesty. We wish both of you
+                    a beautiful journey together and
+                    an even stronger relationship. ❤️
+
+                </div>
+
+                <button
+                    class="start-btn"
+                    id="startQuizBtn">
+
+                    Start Quiz ❤️
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const language =
+            localStorage.getItem("language")
+            || "English";
+
+        const maleName =
+            localStorage.getItem(
+                "malePartnerName"
+            ) || "Male Partner";
+
+        const femaleName =
+            localStorage.getItem(
+                "femalePartnerName"
+            ) || "Female Partner";
+
+
+        document.getElementById(
+            "maleName"
+        ).textContent = maleName;
+
+
+        document.getElementById(
+            "femaleName"
+        ).textContent = femaleName;
+
+
+        const translations = {
+
+            English: {
+
+                congratulations:
+                    "CONGRATULATIONS ❤️",
+
+                headline:
+                    "How well do you know each other?",
+
+                subtitle:
+                    "Your Miracle Quiz journey is about to begin.",
+
+                wish:
+                    "Answer the upcoming questions with love and honesty. We wish both of you a beautiful journey together and an even stronger relationship. ❤️",
+
+                male:
+                    "Male Partner",
+
+                female:
+                    "Female Partner",
+
+                button:
+                    "Start Quiz ❤️"
+            },
+
+
+            "සිංහල": {
+
+                congratulations:
+                    "සුබ පැතුම්! ❤️",
+
+                headline:
+                    "ඔබ දෙදෙනා එකිනෙකා ගැන කොතරම් හොඳින් දන්නවාද?",
+
+                subtitle:
+                    "ඔබ දෙදෙනාගේ Miracle Quiz ආදරණීය ගමන දැන් ආරම්භ වීමට සූදානම්.",
+
+                wish:
+                    "ඉදිරියේදී ලැබෙන ප්‍රශ්නවලට ආදරයෙන් හා අවංකව පිළිතුරු දෙන්න. ඔබ දෙදෙනාගේ බැඳීම තවත් ශක්තිමත් කරගෙන සුන්දර ආදරණීය ගමනක් ඉදිරියට ගෙන යාමට අපගේ සුබ පැතුම්! ❤️",
+
+                male:
+                    "පිරිමි සහකරු",
+
+                female:
+                    "කාන්තා සහකාරිය",
+
+                button:
+                    "ප්‍රශ්න ආරම්භ කරන්න ❤️"
+            },
+
+
+            "தமிழ்": {
+
+                congratulations:
+                    "வாழ்த்துக்கள்! ❤️",
+
+                headline:
+                    "நீங்கள் ஒருவரை ஒருவர் எவ்வளவு நன்றாக அறிவீர்கள்?",
+
+                subtitle:
+                    "உங்கள் Miracle Quiz காதல் பயணம் இப்போது தொடங்கப் போகிறது.",
+
+                wish:
+                    "வரவிருக்கும் கேள்விகளுக்கு அன்புடனும் நேர்மையுடனும் பதிலளியுங்கள். உங்கள் இருவரின் உறவு மேலும் வலுப்பெற்று அழகான காதல் பயணமாக தொடர எங்கள் வாழ்த்துக்கள்! ❤️",
+
+                male:
+                    "ஆண் துணை",
+
+                female:
+                    "பெண் துணை",
+
+                button:
+                    "வினாடி வினாவை தொடங்குங்கள் ❤️"
+            }
+
+        };
+
+
+        const text =
+            translations[language]
+            || translations.English;
+
+
+        document.getElementById(
+            "congratulations"
+        ).textContent =
+            text.congratulations;
+
+
+        document.getElementById(
+            "headline"
+        ).textContent =
+            text.headline;
+
+
+        document.getElementById(
+            "subtitle"
+        ).textContent =
+            text.subtitle;
+
+
+        document.getElementById(
+            "wish"
+        ).textContent =
+            text.wish;
+
+
+        document.getElementById(
+            "maleLabel"
+        ).textContent =
+            text.male;
+
+
+        document.getElementById(
+            "femaleLabel"
+        ).textContent =
+            text.female;
+
+
+        document.getElementById(
+            "startQuizBtn"
+        ).textContent =
+            text.button;
+
+
+        document.getElementById(
+            "startQuizBtn"
+        ).addEventListener(
+            "click",
+            function () {
+
+                window.location.href =
+                    "page4.html";
+
+            }
+        );
+
+
+        function createHeart() {
+
+            const heart =
+                document.createElement("div");
+
+            heart.className =
+                "floating-heart";
+
+            heart.textContent =
+                "♥";
+
+            heart.style.left =
+                Math.random() * 100 + "vw";
+
+            heart.style.fontSize =
+                (
+                    12 +
+                    Math.random() * 18
+                ) + "px";
+
+            heart.style.animationDuration =
+                (
+                    6 +
+                    Math.random() * 5
+                ) + "s";
+
+            document.body.appendChild(
+                heart
+            );
+
+
+            setTimeout(
+                function () {
+                    heart.remove();
+                },
+                11000
+            );
+        }
+
+
+        setInterval(
+            createHeart,
+            900
+        );
+
+    </script>
+
+</body>
+</html>
