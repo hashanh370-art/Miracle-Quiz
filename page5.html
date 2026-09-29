@@ -683,7 +683,36 @@ document.getElementById("backBtn").addEventListener("click", function () {
     }
 });
 
-document.getElementById("nextBtn").addEventListener("click", function () {
+async function saveGuessesToServer() {
+    if (!coupleId || !partnerId) {
+        throw new Error("Couple or Partner information not found.");
+    }
+
+    const response = await fetch(
+        "/api/couples/" + encodeURIComponent(coupleId) + "/quiz/guesses",
+        {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                partnerId: Number(partnerId),
+                guesses: guesses
+            })
+        }
+    );
+
+    let data = {};
+    try {
+        data = await response.json();
+    } catch (e) {}
+
+    if (!response.ok) {
+        throw new Error(data.message || "Could not save partner answers.");
+    }
+
+    return data;
+}
+
+document.getElementById("nextBtn").addEventListener("click", async function () {
     const question = orderedQuestions[currentQuestion];
 
     if (!guesses[question.id]) return;
@@ -695,16 +724,38 @@ document.getElementById("nextBtn").addEventListener("click", function () {
         renderQuestion();
         window.scrollTo({top:0, behavior:"smooth"});
     } else {
-        localStorage.setItem(completedKey, "true");
+        const nextBtn = document.getElementById("nextBtn");
+        const oldText = nextBtn.textContent;
+        nextBtn.disabled = true;
+        nextBtn.textContent = t(
+            "Saving... ❤️",
+            "සුරකිමින්... ❤️",
+            "சேமிக்கிறது... ❤️"
+        );
 
-        alert(t(
-            "Your partner quiz answers have been saved ❤️",
-            "ඔබගේ සහකරු/සහකාරිය ගැන දුන් පිළිතුරු සුරැකුණා ❤️",
-            "உங்கள் துணையைப் பற்றிய பதில்கள் சேமிக்கப்பட்டன ❤️"
-        ));
+        try {
+            await saveGuessesToServer();
+            localStorage.setItem(completedKey, "true");
 
-        // Page 6 can compare these guesses with the partner's Page 4 answers.
-        window.location.href = "page6.html";
+            alert(t(
+                "Your partner quiz answers have been saved ❤️",
+                "ඔබගේ සහකරු/සහකාරිය ගැන දුන් පිළිතුරු සුරැකුණා ❤️",
+                "உங்கள் துணையைப் பற்றிய பதில்கள் சேமிக்கப்பட்டன ❤️"
+            ));
+
+            window.location.href = "page6.html";
+        } catch (error) {
+            console.error(error);
+
+            alert(t(
+                "Could not save your partner answers to the server. Please make sure the server is running and try again.",
+                "ඔබගේ පිළිතුරු server එකට save කරන්න බැරි වුණා. Server එක run වෙනවාද බලලා නැවත උත්සාහ කරන්න.",
+                "உங்கள் பதில்களை server-ல் சேமிக்க முடியவில்லை. Server இயங்குகிறதா என்று பார்த்து மீண்டும் முயற்சிக்கவும்."
+            ));
+
+            nextBtn.disabled = false;
+            nextBtn.textContent = oldText;
+        }
     }
 });
 

@@ -933,7 +933,7 @@ document
     .getElementById("nextBtn")
     .addEventListener(
         "click",
-        function () {
+        async function () {
 
             const question =
                 questions[currentQuestion];
@@ -957,28 +957,85 @@ document
 
             } else {
 
-                localStorage.setItem(
-                    "page4Completed_" +
-                    coupleId +
-                    "_" +
-                    partnerId,
-                    "true"
-                );
+                const nextBtn = document.getElementById("nextBtn");
+                const oldText = nextBtn.textContent;
 
-                alert(
+                nextBtn.disabled = true;
+                nextBtn.textContent =
                     language === "සිංහල"
-                        ? "ඔබගේ පිළිතුරු සුරැකුණා ❤️"
+                        ? "සුරකිමින්..."
                         : language === "தமிழ்"
-                        ? "உங்கள் பதில்கள் சேமிக்கப்பட்டன ❤️"
-                        : "Your answers have been saved ❤️"
-                );
+                        ? "சேமிக்கிறது..."
+                        : "Saving...";
 
-                /*
-                Page 5 will be created next.
-                */
+                try {
 
-                window.location.href =
-                    "page5.html";
+                    if (!partnerId) {
+                        throw new Error("Partner information not found.");
+                    }
+
+                    const response = await fetch(
+                        "/api/couples/" +
+                        encodeURIComponent(coupleId) +
+                        "/quiz/actual",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                partnerId: partnerId,
+                                answers: answers
+                            })
+                        }
+                    );
+
+                    let data = {};
+                    try {
+                        data = await response.json();
+                    } catch (e) {}
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.error ||
+                            data.message ||
+                            "Could not save answers to the server."
+                        );
+                    }
+
+                    localStorage.setItem(
+                        "page4Completed_" +
+                        coupleId +
+                        "_" +
+                        partnerId,
+                        "true"
+                    );
+
+                    alert(
+                        language === "සිංහල"
+                            ? "ඔබගේ පිළිතුරු සුරැකුණා ❤️"
+                            : language === "தமிழ்"
+                            ? "உங்கள் பதில்கள் சேமிக்கப்பட்டன ❤️"
+                            : "Your answers have been saved ❤️"
+                    );
+
+                    window.location.href = "page5.html";
+
+                } catch (error) {
+
+                    console.error("Page 4 save error:", error);
+
+                    alert(
+                        language === "සිංහල"
+                            ? "පිළිතුරු server එකට save කරන්න බැරි වුණා. නැවත උත්සාහ කරන්න."
+                            : language === "தமிழ்"
+                            ? "பதில்களை server-ல் சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
+                            : "Could not save your answers. Please try again."
+                    );
+
+                    nextBtn.disabled = false;
+                    nextBtn.textContent = oldText;
+                }
             }
         }
     );
