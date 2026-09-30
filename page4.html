@@ -1,1048 +1,804 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+code = r'''<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Miracle Quiz - Questions ❤️</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miracle Quiz ❤️ - Page 4</title>
 
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-body {
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    color: white;
-    background:
-        radial-gradient(circle at top, #42000b 0%, #170005 35%, #050505 72%);
-}
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(120, 0, 20, 0.28), transparent 45%),
+                #050505;
+            color: #fff;
+        }
 
-.page {
-    min-height: 100vh;
-    padding: 30px 15px;
-}
+        .page {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
 
-.container {
-    width: 100%;
-    max-width: 900px;
-    margin: auto;
-}
+        .quiz-card {
+            width: 100%;
+            max-width: 900px;
+            background: linear-gradient(145deg, #151515, #080808);
+            border: 1px solid rgba(255, 60, 90, 0.25);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow:
+                0 0 45px rgba(150, 0, 30, 0.22),
+                inset 0 0 25px rgba(255, 0, 60, 0.03);
+        }
 
-.header {
-    text-align: center;
-    margin-bottom: 25px;
-}
+        .heart {
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 5px;
+        }
 
-.logo-heart {
-    font-size: 45px;
-    filter: drop-shadow(0 0 16px #ff1748);
-    animation: heartbeat 1.8s infinite;
-}
+        h1 {
+            text-align: center;
+            margin: 0 0 8px;
+            color: #ff4d70;
+        }
 
-@keyframes heartbeat {
-    0%,100% { transform: scale(1); }
-    50% { transform: scale(1.12); }
-}
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 25px;
+        }
 
-.logo {
-    font-size: 38px;
-    font-weight: bold;
-    margin-top: 5px;
-}
+        .progress {
+            text-align: center;
+            color: #ff718b;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
 
-.logo span {
-    color: #ff3159;
-}
+        .question {
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 1.4;
+            text-align: center;
+            margin-bottom: 25px;
+        }
 
-.brand {
-    color: #aaa;
-    font-size: 12px;
-    letter-spacing: 2px;
-    margin-top: 5px;
-}
+        .text-answer {
+            width: 100%;
+            min-height: 130px;
+            resize: vertical;
+            background: #111;
+            color: #fff;
+            border: 1px solid #5d2430;
+            border-radius: 15px;
+            padding: 18px;
+            font-size: 18px;
+            outline: none;
+        }
 
-.progress-text {
-    text-align: center;
-    margin-top: 25px;
-    color: #ff7891;
-    font-size: 14px;
-}
+        .text-answer:focus {
+            border-color: #ff4268;
+            box-shadow: 0 0 15px rgba(255, 50, 90, 0.2);
+        }
 
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background: #24080e;
-    border-radius: 20px;
-    margin-top: 10px;
-    overflow: hidden;
-}
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
 
-.progress-fill {
-    height: 100%;
-    width: 5%;
-    background: linear-gradient(90deg, #c9002f, #ff3159);
-    transition: width .4s ease;
-}
+        .option {
+            border: 1px solid #3e2028;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #101010;
+            cursor: pointer;
+            transition: 0.2s ease;
+            position: relative;
+        }
 
-.question-card {
-    margin-top: 25px;
-    padding: 30px;
-    border-radius: 24px;
-    background: rgba(18, 7, 10, .96);
-    border: 1px solid rgba(255, 49, 89, .3);
-    box-shadow:
-        0 20px 60px rgba(0,0,0,.55),
-        0 0 30px rgba(255,20,60,.07);
-}
+        .option:hover {
+            transform: translateY(-2px);
+            border-color: #ff466c;
+            box-shadow: 0 0 18px rgba(255, 40, 80, 0.16);
+        }
 
-.question-number {
-    color: #ff496b;
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
+        .option.selected {
+            border-color: #ff3f67;
+            box-shadow:
+                0 0 0 2px rgba(255, 63, 103, 0.35),
+                0 0 25px rgba(255, 30, 70, 0.22);
+        }
 
-.question {
-    font-size: 26px;
-    line-height: 1.4;
-    margin-bottom: 25px;
-}
+        .option img {
+            width: 100%;
+            height: 210px;
+            display: block;
+            object-fit: cover;
+            background: #1b1b1b;
+        }
 
-.answer-input {
-    width: 100%;
-    padding: 17px;
-    border-radius: 14px;
-    border: 1px solid #512832;
-    background: #0d080a;
-    color: white;
-    font-size: 17px;
-    outline: none;
-}
+        .option-name {
+            padding: 13px;
+            text-align: center;
+            font-size: 17px;
+            font-weight: bold;
+        }
 
-.answer-input:focus {
-    border-color: #ff3159;
-    box-shadow: 0 0 0 3px rgba(255,49,89,.12);
-}
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 28px;
+        }
 
-.image-options {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-}
+        button {
+            flex: 1;
+            border: 0;
+            border-radius: 14px;
+            padding: 15px 20px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-.image-option {
-    position: relative;
-    min-height: 180px;
-    border-radius: 18px;
-    overflow: hidden;
-    cursor: pointer;
-    background: #14090c;
-    border: 2px solid #3b1d25;
-    transition: .25s;
-}
+        .back-btn {
+            background: #242424;
+            color: #fff;
+        }
 
-.image-option:hover {
-    transform: translateY(-2px);
-    border-color: #a82b46;
-}
+        .next-btn {
+            background: linear-gradient(135deg, #8f102d, #ff315d);
+            color: #fff;
+        }
 
-.image-option.selected {
-    border-color: #ff3159;
-    box-shadow: 0 0 25px rgba(255,49,89,.35);
-}
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
 
-.image-option img {
-    width: 100%;
-    height: 170px;
-    object-fit: cover;
-    display: block;
-}
+        .loading {
+            text-align: center;
+            color: #ff718b;
+            padding: 40px 10px;
+            font-size: 18px;
+        }
 
-.option-name {
-    padding: 12px;
-    text-align: center;
-    font-weight: bold;
-}
+        .error {
+            text-align: center;
+            color: #ff8b9f;
+            background: rgba(120, 0, 20, 0.18);
+            border: 1px solid rgba(255, 80, 110, 0.25);
+            border-radius: 14px;
+            padding: 15px;
+            margin-top: 15px;
+        }
 
-.tick {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: #ff3159;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 20px;
-    box-shadow: 0 0 15px rgba(255,49,89,.7);
-}
+        @media (max-width: 650px) {
+            .page {
+                padding: 12px;
+            }
 
-.image-option.selected .tick {
-    display: flex;
-}
+            .quiz-card {
+                padding: 18px;
+                border-radius: 18px;
+            }
 
-.nav-buttons {
-    display: flex;
-    gap: 12px;
-    margin-top: 25px;
-}
+            .question {
+                font-size: 20px;
+            }
 
-.btn {
-    flex: 1;
-    padding: 16px;
-    border: none;
-    border-radius: 13px;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-}
+            .options {
+                grid-template-columns: 1fr;
+            }
 
-.back-btn {
-    background: #281116;
-    border: 1px solid #57303a;
-}
+            .option img {
+                height: 190px;
+            }
 
-.next-btn {
-    background: linear-gradient(135deg, #c9002f, #ff3159);
-    box-shadow: 0 10px 30px rgba(255,25,70,.22);
-}
-
-.btn:disabled {
-    opacity: .35;
-    cursor: not-allowed;
-}
-
-.note {
-    text-align: center;
-    color: #888;
-    margin-top: 15px;
-    font-size: 12px;
-}
-
-@media(max-width:650px) {
-    .question-card {
-        padding: 22px 15px;
-    }
-
-    .question {
-        font-size: 21px;
-    }
-
-    .image-options {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-
-    .image-option {
-        min-height: 140px;
-    }
-
-    .image-option img {
-        height: 125px;
-    }
-
-    .logo {
-        font-size: 31px;
-    }
-}
-</style>
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="page">
-<div class="container">
+    <div class="quiz-card">
 
-    <div class="header">
-        <div class="logo-heart">❤️</div>
-        <div class="logo">Miracle <span>Quiz</span></div>
-        <div class="brand">BY MIRACLE HEART</div>
+        <div class="heart">❤️</div>
 
-        <div class="progress-text" id="progressText">
-            Question 1 of 20
+        <h1 id="title">Miracle Quiz</h1>
+
+        <div class="subtitle" id="subtitle">
+            Answer honestly. Your answers will be used for your partner's guessing round.
         </div>
 
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-    </div>
-
-    <div class="question-card">
-
-        <div class="question-number" id="questionNumber">
-            QUESTION 01
-        </div>
-
-        <div class="question" id="questionText"></div>
-
-        <div id="answerArea"></div>
-
-        <div class="nav-buttons">
-
-            <button
-                class="btn back-btn"
-                id="backBtn">
-                ← Previous
-            </button>
-
-            <button
-                class="btn next-btn"
-                id="nextBtn">
-                Next ❤️
-            </button>
-
-        </div>
-
-        <div class="note">
-            Your answers will be used for your Miracle Quiz ❤️
+        <div id="quizArea">
+            <div class="loading">
+                Loading your Couple's shared questions...
+            </div>
         </div>
 
     </div>
-
-</div>
 </div>
 
 <script>
+    const coupleId = localStorage.getItem("coupleId");
+    const partnerId = localStorage.getItem("partnerId");
+    const language = localStorage.getItem("language") || "English";
 
-const coupleId = localStorage.getItem("coupleId");
-const partnerId = localStorage.getItem("partnerId");
-const language = localStorage.getItem("language") || "English";
-
-if (!coupleId) {
-    alert("Couple information not found.");
-    window.location.href = "/";
-}
-
-/*
-IMPORTANT:
-For image questions, JPG files go inside:
-
-MQ/images/
-
-Example:
-images/mango.jpg
-images/apple.jpg
-*/
-
-const questions = [
-
-{
-    id: "q1",
-    type: "text",
-    en: "What is your name?",
-    si: "ඔබගේ නම කුමක්ද?",
-    ta: "உங்கள் பெயர் என்ன?"
-},
-
-{
-    id: "q2",
-    type: "text",
-    en: "What is your birthday?",
-    si: "ඔබගේ උපන්දිනය කවදාද?",
-    ta: "உங்கள் பிறந்த நாள் எப்போது?"
-},
-
-{
-    id: "q3",
-    type: "text",
-    en: "Where do you live?",
-    si: "ඔබ ජීවත් වන්නේ කොහේද?",
-    ta: "நீங்கள் எங்கு வசிக்கிறீர்கள்?"
-},
-
-{
-    id: "q4",
-    type: "image",
-    en: "Which fruit do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති පලතුර කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த பழம் எது?",
-    pool: [
-        ["Mango","images/mango.jpg"],
-        ["Apple","images/apple.jpg"],
-        ["Orange","images/orange.jpg"],
-        ["Grapes","images/grapes.jpg"],
-        ["Pineapple","images/pineapple.jpg"],
-        ["Watermelon","images/watermelon.jpg"],
-        ["Strawberry","images/strawberry.jpg"],
-        ["Banana","images/banana.jpg"]
-    ]
-},
-
-{
-    id: "q5",
-    type: "image",
-    en: "Which food do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති කෑම කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த உணவு எது?",
-    pool: [
-        ["Pizza","images/pizza.jpg"],
-        ["Burger","images/burger.jpg"],
-        ["Rice","images/rice.jpg"],
-        ["Noodles","images/noodles.jpg"],
-        ["Kottu","images/kottu.jpg"],
-        ["Pasta","images/pasta.jpg"],
-        ["Chicken","images/chicken.jpg"],
-        ["Seafood","images/seafood.jpg"]
-    ]
-},
-
-{
-    id: "q6",
-    type: "image",
-    en: "Which drink do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති පානය කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த பானம் எது?",
-    pool: [
-        ["Tea","images/tea.jpg"],
-        ["Coffee","images/coffee.jpg"],
-        ["Juice","images/juice.jpg"],
-        ["Soft Drink","images/softdrink.jpg"],
-        ["Milkshake","images/milkshake.jpg"],
-        ["Water","images/water.jpg"],
-        ["Chocolate Drink","images/chocolate-drink.jpg"],
-        ["Fruit Smoothie","images/smoothie.jpg"]
-    ]
-},
-
-{
-    id: "q7",
-    type: "image",
-    en: "Which place would you choose for a romantic date?",
-    si: "ආදරණීය හමුවකට ඔබ තෝරාගන්නේ කුමන ස්ථානයද?",
-    ta: "காதல் சந்திப்பிற்கு எந்த இடத்தை தேர்வு செய்வீர்கள்?",
-    pool: [
-        ["Beach","images/beach.jpg"],
-        ["Restaurant","images/restaurant.jpg"],
-        ["Cinema","images/cinema.jpg"],
-        ["Park","images/park.jpg"],
-        ["Mountain","images/mountain.jpg"],
-        ["Hotel","images/hotel.jpg"],
-        ["Cafe","images/cafe.jpg"],
-        ["Waterfall","images/waterfall.jpg"]
-    ]
-},
-
-{
-    id: "q8",
-    type: "image",
-    en: "Which type of weather do you like?",
-    si: "ඔබ කැමති කාලගුණය කුමක්ද?",
-    ta: "உங்களுக்கு பிடித்த காலநிலை எது?",
-    pool: [
-        ["Sunny","images/sunny.jpg"],
-        ["Rainy","images/rainy.jpg"],
-        ["Cloudy","images/cloudy.jpg"],
-        ["Cool","images/cool.jpg"],
-        ["Snowy","images/snowy.jpg"],
-        ["Windy","images/windy.jpg"],
-        ["Sunset","images/sunset.jpg"],
-        ["Night","images/night.jpg"]
-    ]
-},
-
-{
-    id: "q9",
-    type: "image",
-    en: "Which pet do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති සුරතලා කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த செல்லப்பிராணி எது?",
-    pool: [
-        ["Dog","images/dog.jpg"],
-        ["Cat","images/cat.jpg"],
-        ["Bird","images/bird.jpg"],
-        ["Rabbit","images/rabbit.jpg"],
-        ["Fish","images/fish.jpg"],
-        ["Hamster","images/hamster.jpg"],
-        ["Parrot","images/parrot.jpg"],
-        ["Turtle","images/turtle.jpg"]
-    ]
-},
-
-{
-    id: "q10",
-    type: "image",
-    en: "Which flower do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති මල කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த மலர் எது?",
-    pool: [
-        ["Rose","images/rose.jpg"],
-        ["Sunflower","images/sunflower.jpg"],
-        ["Lotus","images/lotus.jpg"],
-        ["Lily","images/lily.jpg"],
-        ["Tulip","images/tulip.jpg"],
-        ["Orchid","images/orchid.jpg"],
-        ["Jasmine","images/jasmine.jpg"],
-        ["Daisy","images/daisy.jpg"]
-    ]
-},
-
-{
-    id: "q11",
-    type: "image",
-    en: "Which color do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති පාට කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த நிறம் எது?",
-    pool: [
-        ["Red","images/red.jpg"],
-        ["Blue","images/blue.jpg"],
-        ["Black","images/black.jpg"],
-        ["White","images/white.jpg"],
-        ["Pink","images/pink.jpg"],
-        ["Purple","images/purple.jpg"],
-        ["Green","images/green.jpg"],
-        ["Yellow","images/yellow.jpg"]
-    ]
-},
-
-{
-    id: "q12",
-    type: "image",
-    en: "Which type of movie do you like?",
-    si: "ඔබ කැමති චිත්‍රපට වර්ගය කුමක්ද?",
-    ta: "உங்களுக்கு பிடித்த திரைப்பட வகை எது?",
-    pool: [
-        ["Romance","images/romance.jpg"],
-        ["Comedy","images/comedy.jpg"],
-        ["Action","images/action.jpg"],
-        ["Horror","images/horror.jpg"],
-        ["Adventure","images/adventure.jpg"],
-        ["Animation","images/animation.jpg"],
-        ["Mystery","images/mystery.jpg"],
-        ["Drama","images/drama.jpg"]
-    ]
-},
-
-{
-    id: "q13",
-    type: "image",
-    en: "What would you prefer to do on a free day?",
-    si: "නිවාඩු දවසක ඔබ කරන්න වැඩිපුරම කැමති දේ කුමක්ද?",
-    ta: "விடுமுறை நாளில் நீங்கள் என்ன செய்ய விரும்புவீர்கள்?",
-    pool: [
-        ["Stay Home","images/stay-home.jpg"],
-        ["Travel","images/travel.jpg"],
-        ["Shopping","images/shopping.jpg"],
-        ["Meet Friends","images/friends.jpg"],
-        ["Watch Movies","images/watch-movie.jpg"],
-        ["Go to Beach","images/beach-day.jpg"],
-        ["Sleep","images/sleep.jpg"],
-        ["Play Games","images/games.jpg"]
-    ]
-},
-
-{
-    id: "q14",
-    type: "image",
-    en: "Which gift would make you happiest?",
-    si: "ඔබව වැඩිපුරම සතුටු කරන තෑග්ග කුමක්ද?",
-    ta: "எந்த பரிசு உங்களை அதிகம் மகிழ்விக்கும்?",
-    pool: [
-        ["Flowers","images/gift-flowers.jpg"],
-        ["Chocolate","images/chocolate.jpg"],
-        ["Perfume","images/perfume.jpg"],
-        ["Clothes","images/clothes.jpg"],
-        ["Jewelry","images/jewelry.jpg"],
-        ["Teddy Bear","images/teddy.jpg"],
-        ["Phone","images/phone.jpg"],
-        ["Surprise Date","images/surprise-date.jpg"]
-    ]
-},
-
-{
-    id: "q15",
-    type: "image",
-    en: "Which trip would you enjoy the most?",
-    si: "ඔබ වැඩිපුරම කැමති සංචාරය කුමක්ද?",
-    ta: "எந்த பயணத்தை நீங்கள் அதிகம் விரும்புவீர்கள்?",
-    pool: [
-        ["Beach Trip","images/trip-beach.jpg"],
-        ["Mountain Trip","images/trip-mountain.jpg"],
-        ["City Trip","images/trip-city.jpg"],
-        ["Nature Trip","images/trip-nature.jpg"],
-        ["Camping","images/camping.jpg"],
-        ["Road Trip","images/roadtrip.jpg"],
-        ["Luxury Hotel","images/luxury-hotel.jpg"],
-        ["Foreign Trip","images/foreign-trip.jpg"]
-    ]
-},
-
-{
-    id: "q16",
-    type: "image",
-    en: "Which romantic activity do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති ආදරණීය ක්‍රියාකාරකම කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த காதல் செயல் எது?",
-    pool: [
-        ["Dinner Date","images/dinner-date.jpg"],
-        ["Long Drive","images/long-drive.jpg"],
-        ["Beach Walk","images/beach-walk.jpg"],
-        ["Movie Night","images/movie-night.jpg"],
-        ["Cooking Together","images/cooking.jpg"],
-        ["Travel Together","images/travel-together.jpg"],
-        ["Coffee Date","images/coffee-date.jpg"],
-        ["Sunset Date","images/sunset-date.jpg"]
-    ]
-},
-
-{
-    id: "q17",
-    type: "image",
-    en: "Which dessert do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති අතුරුපස කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த இனிப்பு எது?",
-    pool: [
-        ["Ice Cream","images/icecream.jpg"],
-        ["Cake","images/cake.jpg"],
-        ["Chocolate","images/dessert-chocolate.jpg"],
-        ["Donut","images/donut.jpg"],
-        ["Pudding","images/pudding.jpg"],
-        ["Cupcake","images/cupcake.jpg"],
-        ["Fruit Salad","images/fruit-salad.jpg"],
-        ["Waffle","images/waffle.jpg"]
-    ]
-},
-
-{
-    id: "q18",
-    type: "image",
-    en: "Which phone brand do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති දුරකථන සන්නාමය කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த தொலைபேசி பிராண்ட் எது?",
-    pool: [
-        ["iPhone","images/iphone.jpg"],
-        ["Samsung","images/samsung.jpg"],
-        ["Google Pixel","images/google-pixel.jpg"],
-        ["Xiaomi","images/xiaomi.jpg"],
-        ["Vivo","images/vivo.jpg"],
-        ["OPPO","images/oppo.jpg"],
-        ["OnePlus","images/oneplus.jpg"],
-        ["Sony","images/sony.jpg"]
-    ]
-},
-
-{
-    id: "q19",
-    type: "image",
-    en: "Which social media app do you like the most?",
-    si: "ඔබ වැඩිපුරම කැමති සමාජ මාධ්‍ය යෙදුම කුමක්ද?",
-    ta: "உங்களுக்கு மிகவும் பிடித்த சமூக ஊடக செயலி எது?",
-    pool: [
-        ["Facebook","images/facebook.jpg"],
-        ["TikTok","images/tiktok.jpg"],
-        ["Instagram","images/instagram.jpg"],
-        ["YouTube","images/youtube.jpg"],
-        ["WhatsApp","images/whatsapp.jpg"],
-        ["Snapchat","images/snapchat.jpg"],
-        ["X","images/x.jpg"],
-        ["Telegram","images/telegram.jpg"]
-    ]
-},
-
-{
-    id: "q20",
-    type: "image",
-    en: "Which future dream is closest to your heart?",
-    si: "ඔබගේ හදවතට වඩාත් සමීප අනාගත සිහිනය කුමක්ද?",
-    ta: "உங்கள் இதயத்திற்கு நெருக்கமான எதிர்கால கனவு எது?",
-    pool: [
-        ["Happy Family","images/happy-family.jpg"],
-        ["Travel World","images/world-travel.jpg"],
-        ["Dream Home","images/dream-home.jpg"],
-        ["Successful Career","images/career.jpg"],
-        ["Own Business","images/business.jpg"],
-        ["Peaceful Life","images/peaceful-life.jpg"],
-        ["Luxury Life","images/luxury-life.jpg"],
-        ["Adventure Life","images/adventure-life.jpg"]
-    ]
-}
-
-];
-
-let currentQuestion = 0;
-let answers = JSON.parse(
-    localStorage.getItem(
-        "page4Answers_" + coupleId + "_" + partnerId
-    ) || "{}"
-);
-
-/*
-Create one random set of 4 image answers
-for this couple.
-
-Once created, it stays the same after refresh.
-*/
-
-const optionStorageKey = "page4OptionSets_" + coupleId;
-
-let savedOptionSets =
-    JSON.parse(localStorage.getItem(optionStorageKey) || "{}");
-
-/*
-Reset only the option sets for questions that were changed.
-This prevents old saved Q18/Q19 choices from overriding the new pools.
-After the new sets are generated once, remove these two reset lines
-if you want the same random four choices to remain fixed on every refresh.
-*/
-delete savedOptionSets["q18"];
-delete savedOptionSets["q19"];
-localStorage.setItem(optionStorageKey, JSON.stringify(savedOptionSets));
-
-function shuffleArray(array) {
-
-    const copy = [...array];
-
-    for (let i = copy.length - 1; i > 0; i--) {
-
-        const j = Math.floor(Math.random() * (i + 1));
-
-        [copy[i], copy[j]] = [copy[j], copy[i]];
+    if (!coupleId || !partnerId) {
+        alert("Couple information not found.");
+        window.location.href = "/";
     }
 
-    return copy;
-}
+    /*
+        IMPORTANT:
 
-function getOptions(question) {
+        Page 4 answers are stored separately for each partner:
+        page4Answers_COUPLE_ID_1
+        page4Answers_COUPLE_ID_2
 
-    if (savedOptionSets[question.id]) {
-        return savedOptionSets[question.id];
-    }
+        But the answer OPTIONS are NOT partner-specific.
 
-    const randomOptions =
-        shuffleArray(question.pool).slice(0, 4);
+        The options come from:
+        /api/couples/:coupleId/quiz/options
 
-    savedOptionSets[question.id] = randomOptions;
+        Therefore both partners in the SAME Couple receive the
+        exact same option set for each question.
+    */
 
-    localStorage.setItem(
-        optionStorageKey,
-        JSON.stringify(savedOptionSets)
+    const answerStorageKey =
+        "page4Answers_" + coupleId + "_" + partnerId;
+
+    const optionStorageKey =
+        "page4OptionSets_" + coupleId;
+
+    const questions = [
+        {
+            id: "q1",
+            type: "text",
+            text: {
+                English: "What is one thing you love most about your partner?",
+                தமிழ்: "உங்கள் துணையில் நீங்கள் மிகவும் விரும்பும் ஒரு விஷயம் என்ன?",
+                "සිංහල": "ඔයාගේ partner ගැන ඔයා වැඩිපුරම ආදරය කරන දෙයක් මොකක්ද?"
+            }
+        },
+        {
+            id: "q2",
+            type: "text",
+            text: {
+                English: "What is your favorite memory with your partner?",
+                தமிழ்: "உங்கள் துணையுடன் உங்களுக்கு மிகவும் பிடித்த நினைவு என்ன?",
+                "සිංහල": "ඔයාගේ partner එක්ක තියෙන ඔයාගේ ප්‍රියතම මතකය මොකක්ද?"
+            }
+        },
+        {
+            id: "q3",
+            type: "text",
+            text: {
+                English: "What is one dream you want to achieve together?",
+                தமிழ்: "நீங்கள் இருவரும் சேர்ந்து நிறைவேற்ற விரும்பும் ஒரு கனவு என்ன?",
+                "සිංහල": "ඔයාලා දෙන්නා එකට ඉටු කරගන්න කැමති එක හීනයක් මොකක්ද?"
+            }
+        },
+
+        { id: "q4", type: "image", text: {
+            English: "Which fruit would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்தப் பழத்தைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන පලතුරද?"
+        }},
+        { id: "q5", type: "image", text: {
+            English: "Which food would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த உணவைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන කෑමද?"
+        }},
+        { id: "q6", type: "image", text: {
+            English: "Which drink would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த பானத்தைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන බීමද?"
+        }},
+        { id: "q7", type: "image", text: {
+            English: "Which place would your partner prefer?",
+            தமிழ்: "உங்கள் துணை எந்த இடத்தை விரும்புவார்?",
+            "සිංහල": "ඔයාගේ partner කැමති වෙන්නේ මොන ස්ථානයටද?"
+        }},
+        { id: "q8", type: "image", text: {
+            English: "Which weather would your partner prefer?",
+            தமிழ்: "உங்கள் துணை எந்த காலநிலையை விரும்புவார்?",
+            "සිංහල": "ඔයාගේ partner කැමති මොන කාලගුණයටද?"
+        }},
+        { id: "q9", type: "image", text: {
+            English: "Which animal would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த விலங்கைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන සතාද?"
+        }},
+        { id: "q10", type: "image", text: {
+            English: "Which flower would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த மலரைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන මලද?"
+        }},
+        { id: "q11", type: "image", text: {
+            English: "Which color would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த நிறத்தைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන පාටද?"
+        }},
+        { id: "q12", type: "image", text: {
+            English: "Which movie genre would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த திரைப்பட வகையைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන movie type එකද?"
+        }},
+        { id: "q13", type: "image", text: {
+            English: "What would your partner prefer to do on a free day?",
+            தமிழ்: "ஒரு ஓய்வு நாளில் உங்கள் துணை என்ன செய்ய விரும்புவார்?",
+            "සිංහල": "නිදහස් දවසක ඔයාගේ partner කරන්න කැමති මොකක්ද?"
+        }},
+        { id: "q14", type: "image", text: {
+            English: "Which gift would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த பரிசைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන තෑග්ගද?"
+        }},
+        { id: "q15", type: "image", text: {
+            English: "Which type of trip would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த வகையான பயணத்தைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන වගේ trip එකක්ද?"
+        }},
+        { id: "q16", type: "image", text: {
+            English: "Which date would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த டேட்டைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන date idea එකද?"
+        }},
+        { id: "q17", type: "image", text: {
+            English: "Which dessert would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த இனிப்பைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන dessert එකද?"
+        }},
+        { id: "q18", type: "image", text: {
+            English: "Which phone would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த தொலைபேசியைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන phone එකද?"
+        }},
+        { id: "q19", type: "image", text: {
+            English: "Which social media platform would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த சமூக ஊடகத்தைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන social media platform එකද?"
+        }},
+        { id: "q20", type: "image", text: {
+            English: "Which future dream would your partner choose?",
+            தமிழ்: "உங்கள் துணை எந்த எதிர்கால கனவைத் தேர்ந்தெடுப்பார்?",
+            "සිංහල": "ඔයාගේ partner තෝරගන්නේ මොන future dream එකද?"
+        }}
+    ];
+
+    let currentQuestion = 0;
+
+    let answers = JSON.parse(
+        localStorage.getItem(answerStorageKey) || "{}"
     );
 
-    return randomOptions;
-}
+    let savedOptionSets = JSON.parse(
+        localStorage.getItem(optionStorageKey) || "{}"
+    );
 
-function getQuestionText(question) {
+    let optionSetsLoaded = false;
 
-    if (language === "සිංහල") {
-        return question.si;
+    function shuffleArray(array) {
+        const copy = [...array];
+
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+
+        return copy;
     }
 
-    if (language === "தமிழ்") {
-        return question.ta;
+    function getText(question) {
+        return (
+            question.text[language] ||
+            question.text.English
+        );
     }
 
-    return question.en;
-}
+    function saveAnswers() {
+        localStorage.setItem(
+            answerStorageKey,
+            JSON.stringify(answers)
+        );
+    }
 
-function renderQuestion() {
+    function getOptionSet(questionId) {
+        return savedOptionSets[questionId] || [];
+    }
 
-    const question = questions[currentQuestion];
+    function renderQuestion() {
+        const quizArea = document.getElementById("quizArea");
+        const question = questions[currentQuestion];
 
-    document.getElementById("questionNumber").textContent =
-        "QUESTION " +
-        String(currentQuestion + 1).padStart(2, "0");
-
-    document.getElementById("progressText").textContent =
-        "Question " +
-        (currentQuestion + 1) +
-        " of 20";
-
-    document.getElementById("progressFill").style.width =
-        ((currentQuestion + 1) / 20 * 100) + "%";
-
-    document.getElementById("questionText").textContent =
-        getQuestionText(question);
-
-    const answerArea =
-        document.getElementById("answerArea");
-
-    answerArea.innerHTML = "";
-
-    if (question.type === "text") {
-
-        const input =
-            document.createElement("input");
-
-        input.type = question.id === "q2" ? "date" : "text";
-        input.className = "answer-input";
-
-        input.placeholder =
-            language === "සිංහල"
-                ? "ඔබගේ පිළිතුර මෙහි ලියන්න..."
-                : language === "தமிழ்"
-                ? "உங்கள் பதிலை இங்கே எழுதுங்கள்..."
-                : "Type your answer here...";
-
-        input.value =
+        const previousAnswer =
             answers[question.id] || "";
 
-        input.addEventListener("input", function () {
+        let html = "";
 
-            answers[question.id] =
-                this.value.trim();
+        html += `
+            <div class="progress">
+                ${currentQuestion + 1} / ${questions.length}
+            </div>
+        `;
 
-            saveDraft();
-            updateNextButton();
+        html += `
+            <div class="question">
+                ${getText(question)}
+            </div>
+        `;
+
+        if (question.type === "text") {
+            html += `
+                <textarea
+                    id="textAnswer"
+                    class="text-answer"
+                    placeholder="${
+                        language === "සිංහල"
+                            ? "ඔයාගේ answer එක මෙතන ලියන්න..."
+                            : language === "தமிழ்"
+                                ? "உங்கள் பதிலை இங்கே எழுதுங்கள்..."
+                                : "Write your answer here..."
+                    }"
+                >${escapeHtml(previousAnswer)}</textarea>
+            `;
+        } else {
+            const options = getOptionSet(question.id);
+
+            if (!options.length) {
+                html += `
+                    <div class="error">
+                        Options could not be loaded from the Couple server.
+                    </div>
+                `;
+            } else {
+                html += `<div class="options">`;
+
+                options.forEach((option, index) => {
+                    const optionValue =
+                        Array.isArray(option)
+                            ? option[0]
+                            : option.label || option.value || "";
+
+                    const optionImage =
+                        Array.isArray(option)
+                            ? option[1]
+                            : option.image || option.src || "";
+
+                    const selected =
+                        previousAnswer === optionValue
+                            ? "selected"
+                            : "";
+
+                    html += `
+                        <div
+                            class="option ${selected}"
+                            data-value="${escapeAttribute(optionValue)}"
+                            onclick="selectOption(this)"
+                        >
+                            ${
+                                optionImage
+                                    ? `<img src="${escapeAttribute(optionImage)}" alt="${escapeAttribute(optionValue)}">`
+                                    : ""
+                            }
+
+                            <div class="option-name">
+                                ${escapeHtml(optionValue)}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            }
+        }
+
+        html += `
+            <div class="buttons">
+                <button
+                    class="back-btn"
+                    onclick="previousQuestion()"
+                    ${currentQuestion === 0 ? "disabled" : ""}
+                >
+                    ${language === "සිංහල" ? "← ආපසු" : "← Back"}
+                </button>
+
+                <button
+                    class="next-btn"
+                    onclick="nextQuestion()"
+                >
+                    ${
+                        currentQuestion === questions.length - 1
+                            ? (
+                                language === "සිංහල"
+                                    ? "Finish ❤️"
+                                    : language === "தமிழ்"
+                                        ? "Finish ❤️"
+                                        : "Finish ❤️"
+                              )
+                            : (
+                                language === "සිංහල"
+                                    ? "Next →"
+                                    : language === "தமிழ்"
+                                        ? "Next →"
+                                        : "Next →"
+                              )
+                    }
+                </button>
+            </div>
+        `;
+
+        quizArea.innerHTML = html;
+    }
+
+    function selectOption(element) {
+        document.querySelectorAll(".option").forEach(option => {
+            option.classList.remove("selected");
         });
 
-        answerArea.appendChild(input);
+        element.classList.add("selected");
 
-    } else {
+        answers[
+            questions[currentQuestion].id
+        ] = element.dataset.value;
 
-        const optionsContainer =
-            document.createElement("div");
+        saveAnswers();
+    }
 
-        optionsContainer.className =
-            "image-options";
+    function readCurrentTextAnswer() {
+        const textarea =
+            document.getElementById("textAnswer");
 
-        const options =
-            getOptions(question);
+        if (textarea) {
+            answers[
+                questions[currentQuestion].id
+            ] = textarea.value.trim();
 
-        options.forEach(option => {
+            saveAnswers();
+        }
+    }
 
-            const name = option[0];
-            const image = option[1];
+    function hasCurrentAnswer() {
+        const question = questions[currentQuestion];
 
-            const card =
-                document.createElement("div");
+        if (question.type === "text") {
+            const textarea =
+                document.getElementById("textAnswer");
 
-            card.className = "image-option";
+            return textarea &&
+                textarea.value.trim().length > 0;
+        }
 
-            if (answers[question.id] === name) {
-                card.classList.add("selected");
-            }
+        return Boolean(
+            answers[question.id]
+        );
+    }
 
-            card.innerHTML = `
-                <div class="tick">✓</div>
+    function previousQuestion() {
+        readCurrentTextAnswer();
 
-                <img
-                    src="${image}"
-                    alt="${name}"
-                    onerror="
-                        this.style.display='none';
-                        this.parentElement.style.minHeight='100px';
-                    "
-                >
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            renderQuestion();
+        }
+    }
 
-                <div class="option-name">
-                    ${name}
-                </div>
-            `;
+    async function nextQuestion() {
+        readCurrentTextAnswer();
 
-            card.addEventListener(
-                "click",
-                function () {
+        if (!hasCurrentAnswer()) {
+            const message =
+                language === "සිංහල"
+                    ? "කරුණාකර answer එකක් තෝරන්න හෝ ලියන්න."
+                    : language === "தமிழ்"
+                        ? "தயவுசெய்து ஒரு பதிலைத் தேர்ந்தெடுக்கவும் அல்லது எழுதவும்."
+                        : "Please select or enter an answer.";
 
-                    answers[question.id] = name;
+            alert(message);
+            return;
+        }
 
-                    saveDraft();
+        if (currentQuestion < questions.length - 1) {
+            currentQuestion++;
+            renderQuestion();
+            return;
+        }
 
-                    document
-                        .querySelectorAll(".image-option")
-                        .forEach(item =>
-                            item.classList.remove("selected")
-                        );
+        await submitActualAnswers();
+    }
 
-                    card.classList.add("selected");
+    async function submitActualAnswers() {
+        const quizArea =
+            document.getElementById("quizArea");
 
-                    updateNextButton();
+        quizArea.innerHTML = `
+            <div class="loading">
+                Saving your answers securely... ❤️
+            </div>
+        `;
+
+        try {
+            const response = await fetch(
+                "/api/couples/" +
+                encodeURIComponent(coupleId) +
+                "/quiz/actual",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        partnerId: Number(partnerId),
+                        answers: answers
+                    })
                 }
             );
 
-            optionsContainer.appendChild(card);
-        });
+            const data = await response.json();
 
-        answerArea.appendChild(optionsContainer);
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    "Unable to save answers."
+                );
+            }
+
+            localStorage.setItem(
+                "page4Completed_" +
+                coupleId +
+                "_" +
+                partnerId,
+                "true"
+            );
+
+            window.location.href = "page5.html";
+
+        } catch (error) {
+            console.error(error);
+
+            quizArea.innerHTML = `
+                <div class="error">
+                    ${escapeHtml(error.message)}
+                    <br><br>
+                    <button
+                        class="next-btn"
+                        onclick="location.reload()"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
     }
 
-    document.getElementById("backBtn").disabled =
-        currentQuestion === 0;
-
-    const nextBtn =
-        document.getElementById("nextBtn");
-
-    if (currentQuestion === 19) {
-
-        nextBtn.textContent =
-            language === "සිංහල"
-                ? "පිළිතුරු සුරකින්න ❤️"
-                : language === "தமிழ்"
-                ? "பதில்களை சேமிக்கவும் ❤️"
-                : "Save Answers ❤️";
-
-    } else {
-
-        nextBtn.textContent =
-            language === "සිංහල"
-                ? "ඊළඟ ප්‍රශ්නය ❤️"
-                : language === "தமிழ்"
-                ? "அடுத்த கேள்வி ❤️"
-                : "Next ❤️";
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
-    updateNextButton();
-}
+    function escapeAttribute(value) {
+        return escapeHtml(value);
+    }
 
-function updateNextButton() {
+    async function loadSharedOptionSets() {
+        try {
+            const response = await fetch(
+                "/api/couples/" +
+                encodeURIComponent(coupleId) +
+                "/quiz/options"
+            );
 
-    const question =
-        questions[currentQuestion];
+            const data = await response.json();
 
-    const value =
-        answers[question.id];
-
-    document.getElementById("nextBtn").disabled =
-        !value || String(value).trim() === "";
-}
-
-function saveDraft() {
-
-    localStorage.setItem(
-        "page4Answers_" + coupleId + "_" + partnerId,
-        JSON.stringify(answers)
-    );
-}
-
-document
-    .getElementById("backBtn")
-    .addEventListener(
-        "click",
-        function () {
-
-            if (currentQuestion > 0) {
-
-                currentQuestion--;
-
-                renderQuestion();
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    "Unable to load Couple options."
+                );
             }
+
+            if (
+                !data.optionSets ||
+                typeof data.optionSets !== "object"
+            ) {
+                throw new Error(
+                    "Shared option sets were not found."
+                );
+            }
+
+            /*
+                IMPORTANT:
+
+                Save the SERVER option sets under the COUPLE key.
+
+                Do NOT add partnerId here.
+
+                Correct:
+                page4OptionSets_COUPLE_ID
+
+                Incorrect:
+                page4OptionSets_COUPLE_ID_1
+                page4OptionSets_COUPLE_ID_2
+            */
+
+            savedOptionSets = data.optionSets;
+
+            localStorage.setItem(
+                optionStorageKey,
+                JSON.stringify(savedOptionSets)
+            );
+
+            optionSetsLoaded = true;
+
+            renderQuestion();
+
+        } catch (error) {
+            console.error(
+                "SHARED OPTION LOAD ERROR:",
+                error
+            );
+
+            document.getElementById("quizArea").innerHTML = `
+                <div class="error">
+                    ${escapeHtml(error.message)}
+                    <br><br>
+                    Please make sure the server is running.
+                    <br><br>
+                    <button
+                        class="next-btn"
+                        onclick="loadSharedOptionSets()"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            `;
         }
-    );
+    }
 
-document
-    .getElementById("nextBtn")
-    .addEventListener(
-        "click",
-        async function () {
+    /*
+        Start Page 4.
 
-            const question =
-                questions[currentQuestion];
+        The important difference from the old Page 4 is:
 
-            if (!answers[question.id]) {
-                return;
-            }
+        OLD:
+        Each browser generated its own random options.
 
-            saveDraft();
+        NEW:
+        The server creates ONE option set for the Couple.
+        Both Partner 1 and Partner 2 download that SAME set.
+    */
 
-            if (currentQuestion < 19) {
-
-                currentQuestion++;
-
-                renderQuestion();
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
-
-            } else {
-
-                const nextBtn = document.getElementById("nextBtn");
-                const oldText = nextBtn.textContent;
-
-                nextBtn.disabled = true;
-                nextBtn.textContent =
-                    language === "සිංහල"
-                        ? "සුරකිමින්..."
-                        : language === "தமிழ்"
-                        ? "சேமிக்கிறது..."
-                        : "Saving...";
-
-                try {
-
-                    if (!partnerId) {
-                        throw new Error("Partner information not found.");
-                    }
-
-                    const response = await fetch(
-                        "/api/couples/" +
-                        encodeURIComponent(coupleId) +
-                        "/quiz/actual",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                partnerId: partnerId,
-                                answers: answers
-                            })
-                        }
-                    );
-
-                    let data = {};
-                    try {
-                        data = await response.json();
-                    } catch (e) {}
-
-                    if (!response.ok) {
-                        throw new Error(
-                            data.error ||
-                            data.message ||
-                            "Could not save answers to the server."
-                        );
-                    }
-
-                    localStorage.setItem(
-                        "page4Completed_" +
-                        coupleId +
-                        "_" +
-                        partnerId,
-                        "true"
-                    );
-
-                    alert(
-                        language === "සිංහල"
-                            ? "ඔබගේ පිළිතුරු සුරැකුණා ❤️"
-                            : language === "தமிழ்"
-                            ? "உங்கள் பதில்கள் சேமிக்கப்பட்டன ❤️"
-                            : "Your answers have been saved ❤️"
-                    );
-
-                    window.location.href = "page5.html";
-
-                } catch (error) {
-
-                    console.error("Page 4 save error:", error);
-
-                    alert(
-                        language === "සිංහල"
-                            ? "පිළිතුරු server එකට save කරන්න බැරි වුණා. නැවත උත්සාහ කරන්න."
-                            : language === "தமிழ்"
-                            ? "பதில்களை server-ல் சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
-                            : "Could not save your answers. Please try again."
-                    );
-
-                    nextBtn.disabled = false;
-                    nextBtn.textContent = oldText;
-                }
-            }
-        }
-    );
-
-renderQuestion();
-
+    loadSharedOptionSets();
 </script>
 
 </body>
 </html>
+'''
+
+path = Path("/mnt/data/page4.html.txt")
+path.write_text(code, encoding="utf-8")
+print(path)
