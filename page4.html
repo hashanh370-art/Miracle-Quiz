@@ -1,6 +1,4 @@
-from pathlib import Path
-
-code = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -90,6 +88,23 @@ code = r'''<!DOCTYPE html>
         }
 
         .text-answer:focus {
+            border-color: #ff4268;
+            box-shadow: 0 0 15px rgba(255, 50, 90, 0.2);
+        }
+
+        .date-answer {
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: 1px solid #5d2430;
+            border-radius: 15px;
+            padding: 18px;
+            font-size: 18px;
+            outline: none;
+            color-scheme: dark;
+        }
+
+        .date-answer:focus {
             border-color: #ff4268;
             box-shadow: 0 0 15px rgba(255, 50, 90, 0.2);
         }
@@ -275,27 +290,27 @@ code = r'''<!DOCTYPE html>
             id: "q1",
             type: "text",
             text: {
-                English: "What is one thing you love most about your partner?",
-                தமிழ்: "உங்கள் துணையில் நீங்கள் மிகவும் விரும்பும் ஒரு விஷயம் என்ன?",
-                "සිංහල": "ඔයාගේ partner ගැන ඔයා වැඩිපුරම ආදරය කරන දෙයක් මොකක්ද?"
+                English: "What is your name?",
+                தமிழ்: "உங்கள் பெயர் என்ன?",
+                "සිංහල": "ඔබගේ නම?"
             }
         },
         {
             id: "q2",
             type: "text",
             text: {
-                English: "What is your favorite memory with your partner?",
-                தமிழ்: "உங்கள் துணையுடன் உங்களுக்கு மிகவும் பிடித்த நினைவு என்ன?",
-                "සිංහල": "ඔයාගේ partner එක්ක තියෙන ඔයාගේ ප්‍රියතම මතකය මොකක්ද?"
+                English: "What is your hometown?",
+                தமிழ்: "உங்கள் ஊர் எது?",
+                "සිංහල": "ඔබගේ ගම?"
             }
         },
         {
             id: "q3",
-            type: "text",
+            type: "date",
             text: {
-                English: "What is one dream you want to achieve together?",
-                தமிழ்: "நீங்கள் இருவரும் சேர்ந்து நிறைவேற்ற விரும்பும் ஒரு கனவு என்ன?",
-                "සිංහල": "ඔයාලා දෙන්නා එකට ඉටු කරගන්න කැමති එක හීනයක් මොකක්ද?"
+                English: "What is your birthday?",
+                தமிழ்: "உங்கள் பிறந்த நாள் என்ன?",
+                "සිංහල": "ඔබගේ Birthday එක?"
             }
         },
 
@@ -462,6 +477,15 @@ code = r'''<!DOCTYPE html>
                     }"
                 >${escapeHtml(previousAnswer)}</textarea>
             `;
+        } else if (question.type === "date") {
+            html += `
+                <input
+                    type="date"
+                    id="dateAnswer"
+                    class="date-answer"
+                    value="${escapeAttribute(previousAnswer)}"
+                >
+            `;
         } else {
             const options = getOptionSet(question.id);
 
@@ -576,6 +600,17 @@ code = r'''<!DOCTYPE html>
 
             saveAnswers();
         }
+
+        const dateInput =
+            document.getElementById("dateAnswer");
+
+        if (dateInput) {
+            answers[
+                questions[currentQuestion].id
+            ] = dateInput.value;
+
+            saveAnswers();
+        }
     }
 
     function hasCurrentAnswer() {
@@ -587,6 +622,14 @@ code = r'''<!DOCTYPE html>
 
             return textarea &&
                 textarea.value.trim().length > 0;
+        }
+
+        if (question.type === "date") {
+            const dateInput =
+                document.getElementById("dateAnswer");
+
+            return dateInput &&
+                dateInput.value.trim().length > 0;
         }
 
         return Boolean(
@@ -797,8 +840,3 @@ code = r'''<!DOCTYPE html>
 
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/page4.html.txt")
-path.write_text(code, encoding="utf-8")
-print(path)

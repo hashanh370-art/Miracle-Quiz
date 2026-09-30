@@ -1,6 +1,4 @@
-from pathlib import Path
-
-code = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -89,6 +87,18 @@ code = r'''<!DOCTYPE html>
             padding: 18px;
             font-size: 18px;
             outline: none;
+        }
+
+        .date-answer {
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: 1px solid #5d2430;
+            border-radius: 15px;
+            padding: 18px;
+            font-size: 18px;
+            outline: none;
+            color-scheme: dark;
         }
 
         .options {
@@ -268,27 +278,27 @@ code = r'''<!DOCTYPE html>
             id: "q1",
             type: "text",
             text: {
-                English: "What is one thing your partner loves most about you?",
-                தமிழ்: "உங்கள் துணை உங்களைப் பற்றி மிகவும் விரும்பும் ஒரு விஷயம் என்ன?",
-                "සිංහල": "ඔයාගේ partner ඔයා ගැන වැඩිපුරම ආදරය කරන දෙයක් මොකක්ද?"
+                English: "What is your partner's name?",
+                தமிழ்: "உங்கள் துணையின் பெயர் என்ன?",
+                "සිංහල": "ඔයාගේ partnerගේ නම මොකක්ද?"
             }
         },
         {
             id: "q2",
             type: "text",
             text: {
-                English: "What is your partner's favorite memory with you?",
-                தமிழ்: "உங்கள் துணைக்கு உங்களுடன் மிகவும் பிடித்த நினைவு என்ன?",
-                "සිංහල": "ඔයාගේ partner ට ඔයා එක්ක තියෙන ප්‍රියතම මතකය මොකක්ද?"
+                English: "What is your partner's hometown?",
+                தமிழ்: "உங்கள் துணையின் ஊர் எது?",
+                "සිංහල": "ඔයාගේ partnerගේ ගම මොකක්ද?"
             }
         },
         {
             id: "q3",
-            type: "text",
+            type: "date",
             text: {
-                English: "What is one dream your partner wants to achieve together?",
-                தமிழ்: "உங்கள் துணை உங்களுடன் சேர்ந்து நிறைவேற்ற விரும்பும் கனவு என்ன?",
-                "සිංහල": "ඔයාගේ partner ඔයාලා දෙන්නා එකට ඉටු කරගන්න කැමති හීනය මොකක්ද?"
+                English: "What is your partner's birthday?",
+                தமிழ்: "உங்கள் துணையின் பிறந்த நாள் என்ன?",
+                "සිංහල": "ඔයාගේ partnerගේ Birthday එක කවදාද?"
             }
         },
 
@@ -498,6 +508,15 @@ code = r'''<!DOCTYPE html>
                     }"
                 >${escapeHtml(previousGuess)}</textarea>
             `;
+        } else if (question.type === "date") {
+            html += `
+                <input
+                    type="date"
+                    id="dateAnswer"
+                    class="date-answer"
+                    value="${escapeAttribute(previousGuess)}"
+                >
+            `;
         } else {
             const options =
                 getOptionSet(question.id);
@@ -618,6 +637,19 @@ code = r'''<!DOCTYPE html>
 
             saveGuesses();
         }
+
+        const dateInput =
+            document.getElementById("dateAnswer");
+
+        if (dateInput) {
+            const question =
+                orderedQuestions[currentQuestion];
+
+            guesses[question.id] =
+                dateInput.value;
+
+            saveGuesses();
+        }
     }
 
     function hasCurrentGuess() {
@@ -631,6 +663,16 @@ code = r'''<!DOCTYPE html>
             return Boolean(
                 textarea &&
                 textarea.value.trim()
+            );
+        }
+
+        if (question.type === "date") {
+            const dateInput =
+                document.getElementById("dateAnswer");
+
+            return Boolean(
+                dateInput &&
+                dateInput.value.trim()
             );
         }
 
@@ -862,8 +904,3 @@ code = r'''<!DOCTYPE html>
 
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/page5.html.txt")
-path.write_text(code, encoding="utf-8")
-print(path)
