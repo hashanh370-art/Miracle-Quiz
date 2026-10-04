@@ -3,17 +3,41 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
 const app = express();
-const PORT = 3000;
+
+// Render provides PORT automatically.
+// Local development falls back to 3000.
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// ======================================================
+// SUPABASE ENVIRONMENT VARIABLES
+// ======================================================
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+
+// Temporary in-memory storage used by the existing
+// create / join / profile routes.
+// We can migrate these routes to Supabase next.
 const couples = new Map();
 
+// ======================================================
+// CHECK SUPABASE CONFIGURATION
+// ======================================================
 
-// ==========================================
+function checkSupabaseConfig() {
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+    return false;
+  }
+
+  return true;
+}
+
+// ======================================================
 // CREATE COUPLE
-// ==========================================
+// ======================================================
 
 app.post("/api/couples/create", async (req, res) => {
   try {
@@ -39,9 +63,7 @@ app.post("/api/couples/create", async (req, res) => {
       coupleCode,
       username,
       passwordHash,
-
       partners: 1,
-
       status: "Waiting for partner",
 
       partner1: {
@@ -73,7 +95,7 @@ app.post("/api/couples/create", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Create couple error:", error);
 
     res.status(500).json({
       message: "Server error."
@@ -81,10 +103,9 @@ app.post("/api/couples/create", async (req, res) => {
   }
 });
 
-
-// ==========================================
+// ======================================================
 // JOIN COUPLE
-// ==========================================
+// ======================================================
 
 app.post("/api/couples/join", (req, res) => {
   try {
@@ -127,7 +148,7 @@ app.post("/api/couples/join", (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Join couple error:", error);
 
     res.status(500).json({
       message: "Server error."
@@ -135,19 +156,66 @@ app.post("/api/couples/join", (req, res) => {
   }
 });
 
+// ======================================================
+// GET TOTAL COUPLES COUNT FROM SUPABASE
+// ======================================================
 
-// ==========================================
-// GET TOTAL COUPLES COUNT
-// ==========================================
-
-app.get("/api/couples/count", (req, res) => {
+app.get("/api/couples/count", async (req, res) => {
   try {
+    if (!checkSupabaseConfig()) {
+      console.error(
+        "SUPABASE_URL or SUPABASE_SECRET_KEY is missing."
+      );
+
+      return res.status(500).json({
+        message: "Supabase configuration is missing."
+      });
+    }
+
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/couples?select=*`,
+      {
+        method: "HEAD",
+        headers: {
+          apikey: SUPABASE_SECRET_KEY,
+          Authorization: `Bearer ${SUPABASE_SECRET_KEY}`,
+          Prefer: "count=exact"
+        }
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error(
+        "Supabase count request failed:",
+        response.status,
+        errorText
+      );
+
+      return res.status(500).json({
+        message: "Could not read couples from Supabase."
+      });
+    }
+
+    const contentRange = response.headers.get("content-range");
+
+    let totalCouples = 0;
+
+    if (contentRange) {
+      const total = contentRange.split("/")[1];
+
+      if (total && total !== "*") {
+        totalCouples = Number(total);
+      }
+    }
+
     res.json({
-      totalCouples: couples.size
+      totalCouples
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Supabase couples count error:", error);
 
     res.status(500).json({
       message: "Server error."
@@ -155,10 +223,9 @@ app.get("/api/couples/count", (req, res) => {
   }
 });
 
-
-// ==========================================
+// ======================================================
 // GET COUPLE STATUS
-// ==========================================
+// ======================================================
 
 app.get("/api/couples/:coupleId/status", (req, res) => {
   try {
@@ -191,7 +258,7 @@ app.get("/api/couples/:coupleId/status", (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Get couple status error:", error);
 
     res.status(500).json({
       message: "Server error."
@@ -199,10 +266,9 @@ app.get("/api/couples/:coupleId/status", (req, res) => {
   }
 });
 
-
-// ==========================================
+// ======================================================
 // SAVE PARTNER PROFILE
-// ==========================================
+// ======================================================
 
 app.post("/api/couples/:coupleId/profile", (req, res) => {
   try {
@@ -277,9 +343,7 @@ app.post("/api/couples/:coupleId/profile", (req, res) => {
 
     res.json({
       message: "Partner profile saved successfully ❤️",
-
       coupleId: couple.coupleId,
-
       partnerId: id,
 
       profile: {
@@ -291,7 +355,7 @@ app.post("/api/couples/:coupleId/profile", (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Save profile error:", error);
 
     res.status(500).json({
       message: "Server error."
@@ -299,15 +363,13 @@ app.post("/api/couples/:coupleId/profile", (req, res) => {
   }
 });
 
-
-// ==========================================
+// ======================================================
 // GET PARTNER PROFILE
-// ==========================================
+// ======================================================
 
 app.get(
   "/api/couples/:coupleId/profile/:partnerId",
   (req, res) => {
-
     try {
       const { coupleId, partnerId } = req.params;
 
@@ -342,7 +404,7 @@ app.get(
       });
 
     } catch (error) {
-      console.error(error);
+      console.error("Get profile error:", error);
 
       res.status(500).json({
         message: "Server error."
@@ -351,13 +413,18 @@ app.get(
   }
 );
 
-
-// ==========================================
+// ======================================================
 // START SERVER
-// ==========================================
+// ======================================================
 
 app.listen(PORT, () => {
   console.log(
-    `Magic Miracle Couple Quiz server is running on http://localhost:${PORT}`
+    `Magic Miracle Couple Quiz server is running on port ${PORT}`
   );
+
+  if (checkSupabaseConfig()) {
+    console.log("Supabase environment configuration detected.");
+  } else {
+    console.log("WARNING: Supabase environment variables are missing.");
+  }
 });
