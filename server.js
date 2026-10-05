@@ -3,37 +3,53 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
 const app = express();
-
-// Render provides PORT automatically.
-// Local development falls back to 3000.
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(__dirname));
 
 // ======================================================
-// SUPABASE ENVIRONMENT VARIABLES
+// SUPABASE
 // ======================================================
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 
-// Temporary in-memory storage used by the existing
-// create / join / profile routes.
-// We can migrate these routes to Supabase next.
-const couples = new Map();
-
-// ======================================================
-// CHECK SUPABASE CONFIGURATION
-// ======================================================
-
 function checkSupabaseConfig() {
-  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
-    return false;
-  }
-
-  return true;
+  return Boolean(SUPABASE_URL && SUPABASE_SECRET_KEY);
 }
+
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_SECRET_KEY,
+    Authorization: `Bearer ${SUPABASE_SECRET_KEY}`,
+    "Content-Type": "application/json",
+    ...extra
+  };
+}
+
+function encodeFilter(value) {
+  return encodeURIComponent(String(value));
+}
+
+async function readSupabaseError(response) {
+  try {
+    return await response.text();
+  } catch {
+    return "Unknown Supabase error";
+  }
+}
+
+// ======================================================
+// HEALTH CHECK
+// ======================================================
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    ok: true,
+    supabaseConfigured: checkSupabaseConfig()
+  });
+});
 
 // ======================================================
 // CREATE COUPLE
@@ -41,6 +57,12 @@ function checkSupabaseConfig() {
 
 app.post("/api/couples/create", async (req, res) => {
   try {
+    if (!checkSupabaseConfig()) {
+      return res.status(500).json({
+        message: "Supabase configuration is missing."
+      });
+    }
+
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -49,51 +71,156 @@ app.post("/api/couples/create", async (req, res) => {
       });
     }
 
+    const cleanUsername = username.trim();
+
+    // Check username
+    const usernameCheck = await fetch(
+      `${SUPABASE_URL}/rest/v1/couples?username=eq.${encodeFilter(
+        cleanUsername
+      )}&select=id&limit=1`,
+      {
+        headers: supabaseHeaders()
+      }
+    );
+
+    if (!usernameCheck.ok) {
+      const errorText = await readSupabaseError(usernameCheck);
+      console.error("Username check failed:", errorText);
+
+      return res.status(500).json({
+        message: "Could not check username."
+      });
+    }
+
+    const existingUsers = await usernameCheck.json();
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({
+        message: "Username already exists."
+      });
+    }
+
     const coupleId = crypto.randomUUID();
 
-    const coupleCode = crypto
-      .randomBytes(4)
-      .toString("hex")
-      .toUpperCase();
+    let coupleCode;
+    let codeExists = true;
+
+    // Generate unique couple code
+    while (codeExists) {
+      coupleCode = crypto
+        .randomBytes(4)
+        .toString("hex")
+        .toUpperCase();
+
+      const codeCheck = await fetch(
+        `${SUPABASE_URL}/rest/v1/couples?couple_code=eq.${encodeFilter(
+          coupleCode
+        )}&select=id&limit=1`,
+        {
+          headers: supabaseHeaders()
+        }
+      );
+
+      if (!codeCheck.ok) {
+        const errorText = await readSupabaseError(codeCheck);
+        console.error("Couple code check failed:", errorText);
+
+        return res.status(500).json({
+          message: "Could not generate Couple Code."
+        });
+      }
+
+      const existingCodes = await codeCheck.json();
+      codeExists = existingCodes.length > 0;
+    }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    couples.set(coupleId, {
-      coupleId,
-      coupleCode,
-      username,
-      passwordHash,
-      partners: 1,
-      status: "Waiting for partner",
+    // Save couple
+    const coupleResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/couples`,
+      {
+        method: "POST",
+        headers: supabaseHeaders({
+          Prefer: "return=representation"
+        }),
+        body: JSON.stringify({
+          id: coupleId,
+          couple_code: coupleCode,
+          username: cleanUsername,
+          password_hash: passwordHash,
+          partners: 1,
+          status: "Waiting for partner",
+          option_sets: {}
+        })
+      }
+    );
 
-      partner1: {
-        connected: true,
-        language: null,
-        gender: null,
-        malePartnerName: "",
-        femalePartnerName: ""
-      },
+    if (!coupleResponse.ok) {
+      const errorText = await readSupabaseError(coupleResponse);
+      console.error("Create couple Supabase error:", errorText);
 
-      partner2: {
-        connected: false,
-        language: null,
-        gender: null,
-        malePartnerName: "",
-        femalePartnerName: ""
-      },
+      return res.status(500).json({
+        message: "Could not create Couple Account."
+      });
+    }
 
-      createdAt: new Date().toISOString()
-    });
+    // Create Partner 1
+    const partnerResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/partners`,
+      {
+        method: "POST",
+        headers: supabaseHeaders({
+          Prefer: "return=representation"
+        }),
+        body: JSON.stringify({
+          couple_id: coupleId,
+          partner_number: 1,
+          role: "Partner 1",
+          language: null,
+          gender: null,
+          order_index: null,
+          actual_answers: {},
+          guesses: {},
+          page4_completed: false,
+          page5_completed: false,
+          question_order: [],
+          connected: true,
+          female_partner_name: "",
+          male_partner_name: ""
+        })
+      }
+    );
+
+    if (!partnerResponse.ok) {
+      const errorText = await readSupabaseError(partnerResponse);
+      console.error("Create Partner 1 error:", errorText);
+
+      // Roll back couple if partner creation fails
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/couples?id=eq.${encodeFilter(
+          coupleId
+        )}`,
+        {
+          method: "DELETE",
+          headers: supabaseHeaders()
+        }
+      );
+
+      return res.status(500).json({
+        message: "Could not create Partner profile."
+      });
+    }
 
     res.status(201).json({
       message: "Couple Account created successfully ❤️",
       coupleId,
       coupleCode,
-      username,
+      username: cleanUsername,
       partnerId: 1,
+      partnerNumber: 1,
       status: "Waiting for partner"
     });
-
   } catch (error) {
     console.error("Create couple error:", error);
 
@@ -107,8 +234,14 @@ app.post("/api/couples/create", async (req, res) => {
 // JOIN COUPLE
 // ======================================================
 
-app.post("/api/couples/join", (req, res) => {
+app.post("/api/couples/join", async (req, res) => {
   try {
+    if (!checkSupabaseConfig()) {
+      return res.status(500).json({
+        message: "Supabase configuration is missing."
+      });
+    }
+
     const { coupleCode } = req.body;
 
     if (!coupleCode) {
@@ -117,36 +250,138 @@ app.post("/api/couples/join", (req, res) => {
       });
     }
 
-    const couple = Array.from(couples.values()).find(
-      (item) =>
-        item.coupleCode === coupleCode.trim().toUpperCase()
+    const cleanCode = coupleCode.trim().toUpperCase();
+
+    const coupleResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/couples?couple_code=eq.${encodeFilter(
+        cleanCode
+      )}&select=*&limit=1`,
+      {
+        headers: supabaseHeaders()
+      }
     );
 
-    if (!couple) {
+    if (!coupleResponse.ok) {
+      const errorText = await readSupabaseError(coupleResponse);
+      console.error("Join lookup error:", errorText);
+
+      return res.status(500).json({
+        message: "Could not find Couple Account."
+      });
+    }
+
+    const couples = await coupleResponse.json();
+
+    if (couples.length === 0) {
       return res.status(404).json({
         message: "Invalid Couple Code."
       });
     }
 
-    if (couple.partners >= 2) {
+    const couple = couples[0];
+
+    if (Number(couple.partners) >= 2) {
       return res.status(403).json({
         message: "This Couple Account is already full."
       });
     }
 
-    couple.partners = 2;
-    couple.partner2.connected = true;
-    couple.status = "Our Couple is Connected ❤️";
+    // Check if Partner 2 already exists
+    const existingPartnerResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/partners?couple_id=eq.${encodeFilter(
+        couple.id
+      )}&partner_number=eq.2&select=id&limit=1`,
+      {
+        headers: supabaseHeaders()
+      }
+    );
+
+    if (!existingPartnerResponse.ok) {
+      const errorText = await readSupabaseError(
+        existingPartnerResponse
+      );
+
+      console.error(
+        "Partner 2 lookup error:",
+        errorText
+      );
+
+      return res.status(500).json({
+        message: "Could not check Partner 2."
+      });
+    }
+
+    const existingPartner = await existingPartnerResponse.json();
+
+    if (existingPartner.length === 0) {
+      const partnerResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/partners`,
+        {
+          method: "POST",
+          headers: supabaseHeaders({
+            Prefer: "return=representation"
+          }),
+          body: JSON.stringify({
+            couple_id: couple.id,
+            partner_number: 2,
+            role: "Partner 2",
+            language: null,
+            gender: null,
+            order_index: null,
+            actual_answers: {},
+            guesses: {},
+            page4_completed: false,
+            page5_completed: false,
+            question_order: [],
+            connected: true,
+            female_partner_name: "",
+            male_partner_name: ""
+          })
+        }
+      );
+
+      if (!partnerResponse.ok) {
+        const errorText = await readSupabaseError(partnerResponse);
+        console.error("Create Partner 2 error:", errorText);
+
+        return res.status(500).json({
+          message: "Could not connect Partner 2."
+        });
+      }
+    }
+
+    const updateResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/couples?id=eq.${encodeFilter(
+        couple.id
+      )}`,
+      {
+        method: "PATCH",
+        headers: supabaseHeaders(),
+        body: JSON.stringify({
+          partners: 2,
+          status: "Our Couple is Connected ❤️"
+        })
+      }
+    );
+
+    if (!updateResponse.ok) {
+      const errorText = await readSupabaseError(updateResponse);
+      console.error("Update couple status error:", errorText);
+
+      return res.status(500).json({
+        message: "Could not update Couple status."
+      });
+    }
 
     res.json({
       message: "Our Couple is Connected ❤️",
-      coupleId: couple.coupleId,
-      coupleCode: couple.coupleCode,
+      coupleId: couple.id,
+      coupleCode: couple.couple_code,
       username: couple.username,
       partnerId: 2,
-      status: couple.status
+      partnerNumber: 2,
+      status: "Our Couple is Connected ❤️"
     });
-
   } catch (error) {
     console.error("Join couple error:", error);
 
@@ -157,48 +392,38 @@ app.post("/api/couples/join", (req, res) => {
 });
 
 // ======================================================
-// GET TOTAL COUPLES COUNT FROM SUPABASE
+// TOTAL COUPLES COUNT
 // ======================================================
 
 app.get("/api/couples/count", async (req, res) => {
   try {
     if (!checkSupabaseConfig()) {
-      console.error(
-        "SUPABASE_URL or SUPABASE_SECRET_KEY is missing."
-      );
-
       return res.status(500).json({
         message: "Supabase configuration is missing."
       });
     }
 
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/couples?select=*`,
+      `${SUPABASE_URL}/rest/v1/couples?select=id`,
       {
         method: "HEAD",
-        headers: {
-          apikey: SUPABASE_SECRET_KEY,
-          Authorization: `Bearer ${SUPABASE_SECRET_KEY}`,
+        headers: supabaseHeaders({
           Prefer: "count=exact"
-        }
+        })
       }
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-
-      console.error(
-        "Supabase count request failed:",
-        response.status,
-        errorText
-      );
+      const errorText = await readSupabaseError(response);
+      console.error("Count error:", errorText);
 
       return res.status(500).json({
         message: "Could not read couples from Supabase."
       });
     }
 
-    const contentRange = response.headers.get("content-range");
+    const contentRange =
+      response.headers.get("content-range");
 
     let totalCouples = 0;
 
@@ -213,9 +438,8 @@ app.get("/api/couples/count", async (req, res) => {
     res.json({
       totalCouples
     });
-
   } catch (error) {
-    console.error("Supabase couples count error:", error);
+    console.error("Couples count error:", error);
 
     res.status(500).json({
       message: "Server error."
@@ -227,159 +451,138 @@ app.get("/api/couples/count", async (req, res) => {
 // GET COUPLE STATUS
 // ======================================================
 
-app.get("/api/couples/:coupleId/status", (req, res) => {
-  try {
-    const { coupleId } = req.params;
+app.get(
+  "/api/couples/:coupleId/status",
+  async (req, res) => {
+    try {
+      if (!checkSupabaseConfig()) {
+        return res.status(500).json({
+          message: "Supabase configuration is missing."
+        });
+      }
 
-    const couple = couples.get(coupleId);
+      const { coupleId } = req.params;
 
-    if (!couple) {
-      return res.status(404).json({
-        message: "Couple not found."
+      const coupleResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/couples?id=eq.${encodeFilter(
+          coupleId
+        )}&select=*&limit=1`,
+        {
+          headers: supabaseHeaders()
+        }
+      );
+
+      if (!coupleResponse.ok) {
+        const errorText = await readSupabaseError(coupleResponse);
+        console.error("Get status error:", errorText);
+
+        return res.status(500).json({
+          message: "Could not read Couple status."
+        });
+      }
+
+      const couples = await coupleResponse.json();
+
+      if (couples.length === 0) {
+        return res.status(404).json({
+          message: "Couple not found."
+        });
+      }
+
+      const couple = couples[0];
+
+      const partnerResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/partners?couple_id=eq.${encodeFilter(
+          coupleId
+        )}&select=*&order=partner_number.asc`,
+        {
+          headers: supabaseHeaders()
+        }
+      );
+
+      if (!partnerResponse.ok) {
+        const errorText = await readSupabaseError(partnerResponse);
+        console.error("Get partners error:", errorText);
+
+        return res.status(500).json({
+          message: "Could not read Partners."
+        });
+      }
+
+      const partners = await partnerResponse.json();
+
+      const partner1 = partners.find(
+        (p) => Number(p.partner_number) === 1
+      );
+
+      const partner2 = partners.find(
+        (p) => Number(p.partner_number) === 2
+      );
+
+      res.json({
+        coupleId: couple.id,
+        coupleCode: couple.couple_code,
+        username: couple.username,
+        status: couple.status,
+        partners: couple.partners,
+
+        partner1: partner1
+          ? {
+              connected: partner1.connected,
+              language: partner1.language,
+              gender: partner1.gender
+            }
+          : {
+              connected: false,
+              language: null,
+              gender: null
+            },
+
+        partner2: partner2
+          ? {
+              connected: partner2.connected,
+              language: partner2.language,
+              gender: partner2.gender
+            }
+          : {
+              connected: false,
+              language: null,
+              gender: null
+            }
+      });
+    } catch (error) {
+      console.error("Get couple status error:", error);
+
+      res.status(500).json({
+        message: "Server error."
       });
     }
-
-    res.json({
-      coupleId: couple.coupleId,
-      status: couple.status,
-      partners: couple.partners,
-
-      partner1: {
-        connected: couple.partner1.connected,
-        language: couple.partner1.language,
-        gender: couple.partner1.gender
-      },
-
-      partner2: {
-        connected: couple.partner2.connected,
-        language: couple.partner2.language,
-        gender: couple.partner2.gender
-      }
-    });
-
-  } catch (error) {
-    console.error("Get couple status error:", error);
-
-    res.status(500).json({
-      message: "Server error."
-    });
   }
-});
+);
 
 // ======================================================
 // SAVE PARTNER PROFILE
 // ======================================================
 
-app.post("/api/couples/:coupleId/profile", (req, res) => {
-  try {
-    const { coupleId } = req.params;
-
-    const {
-      partnerId,
-      language,
-      gender,
-      malePartnerName,
-      femalePartnerName
-    } = req.body;
-
-    const couple = couples.get(coupleId);
-
-    if (!couple) {
-      return res.status(404).json({
-        message: "Couple not found."
-      });
-    }
-
-    const id = Number(partnerId);
-
-    if (id !== 1 && id !== 2) {
-      return res.status(400).json({
-        message: "Invalid Partner ID."
-      });
-    }
-
-    const allowedLanguages = [
-      "English",
-      "தமிழ்",
-      "සිංහල"
-    ];
-
-    const allowedGenders = [
-      "Male",
-      "Female"
-    ];
-
-    if (!allowedLanguages.includes(language)) {
-      return res.status(400).json({
-        message: "Invalid language."
-      });
-    }
-
-    if (!allowedGenders.includes(gender)) {
-      return res.status(400).json({
-        message: "Invalid gender."
-      });
-    }
-
-    if (!malePartnerName || !femalePartnerName) {
-      return res.status(400).json({
-        message: "Both partner names are required."
-      });
-    }
-
-    const partner =
-      id === 1
-        ? couple.partner1
-        : couple.partner2;
-
-    partner.language = language;
-    partner.gender = gender;
-
-    partner.malePartnerName =
-      malePartnerName.trim();
-
-    partner.femalePartnerName =
-      femalePartnerName.trim();
-
-    res.json({
-      message: "Partner profile saved successfully ❤️",
-      coupleId: couple.coupleId,
-      partnerId: id,
-
-      profile: {
-        language: partner.language,
-        gender: partner.gender,
-        malePartnerName: partner.malePartnerName,
-        femalePartnerName: partner.femalePartnerName
-      }
-    });
-
-  } catch (error) {
-    console.error("Save profile error:", error);
-
-    res.status(500).json({
-      message: "Server error."
-    });
-  }
-});
-
-// ======================================================
-// GET PARTNER PROFILE
-// ======================================================
-
-app.get(
-  "/api/couples/:coupleId/profile/:partnerId",
-  (req, res) => {
+app.post(
+  "/api/couples/:coupleId/profile",
+  async (req, res) => {
     try {
-      const { coupleId, partnerId } = req.params;
-
-      const couple = couples.get(coupleId);
-
-      if (!couple) {
-        return res.status(404).json({
-          message: "Couple not found."
+      if (!checkSupabaseConfig()) {
+        return res.status(500).json({
+          message: "Supabase configuration is missing."
         });
       }
+
+      const { coupleId } = req.params;
+
+      const {
+        partnerId,
+        language,
+        gender,
+        malePartnerName,
+        femalePartnerName
+      } = req.body;
 
       const id = Number(partnerId);
 
@@ -389,20 +592,159 @@ app.get(
         });
       }
 
-      const partner =
-        id === 1
-          ? couple.partner1
-          : couple.partner2;
+      const allowedLanguages = [
+        "English",
+        "தமிழ்",
+        "සිංහල"
+      ];
+
+      const allowedGenders = [
+        "Male",
+        "Female"
+      ];
+
+      if (!allowedLanguages.includes(language)) {
+        return res.status(400).json({
+          message: "Invalid language."
+        });
+      }
+
+      if (!allowedGenders.includes(gender)) {
+        return res.status(400).json({
+          message: "Invalid gender."
+        });
+      }
+
+      if (!malePartnerName || !femalePartnerName) {
+        return res.status(400).json({
+          message: "Both partner names are required."
+        });
+      }
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/partners?couple_id=eq.${encodeFilter(
+          coupleId
+        )}&partner_number=eq.${id}`,
+        {
+          method: "PATCH",
+          headers: supabaseHeaders({
+            Prefer: "return=representation"
+          }),
+          body: JSON.stringify({
+            language,
+            gender,
+            male_partner_name:
+              malePartnerName.trim(),
+            female_partner_name:
+              femalePartnerName.trim(),
+            connected: true,
+            updated_at: new Date().toISOString()
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await readSupabaseError(response);
+        console.error("Save profile error:", errorText);
+
+        return res.status(500).json({
+          message: "Could not save Partner profile."
+        });
+      }
+
+      const rows = await response.json();
+
+      if (rows.length === 0) {
+        return res.status(404).json({
+          message: "Partner not found."
+        });
+      }
+
+      res.json({
+        message: "Partner profile saved successfully ❤️",
+        coupleId,
+        partnerId: id,
+        profile: {
+          language,
+          gender,
+          malePartnerName:
+            malePartnerName.trim(),
+          femalePartnerName:
+            femalePartnerName.trim()
+        }
+      });
+    } catch (error) {
+      console.error("Save profile error:", error);
+
+      res.status(500).json({
+        message: "Server error."
+      });
+    }
+  }
+);
+
+// ======================================================
+// GET PARTNER PROFILE
+// ======================================================
+
+app.get(
+  "/api/couples/:coupleId/profile/:partnerId",
+  async (req, res) => {
+    try {
+      if (!checkSupabaseConfig()) {
+        return res.status(500).json({
+          message: "Supabase configuration is missing."
+        });
+      }
+
+      const { coupleId, partnerId } = req.params;
+
+      const id = Number(partnerId);
+
+      if (id !== 1 && id !== 2) {
+        return res.status(400).json({
+          message: "Invalid Partner ID."
+        });
+      }
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/partners?couple_id=eq.${encodeFilter(
+          coupleId
+        )}&partner_number=eq.${id}&select=*&limit=1`,
+        {
+          headers: supabaseHeaders()
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await readSupabaseError(response);
+        console.error("Get profile error:", errorText);
+
+        return res.status(500).json({
+          message: "Could not read Partner profile."
+        });
+      }
+
+      const partners = await response.json();
+
+      if (partners.length === 0) {
+        return res.status(404).json({
+          message: "Partner not found."
+        });
+      }
+
+      const partner = partners[0];
 
       res.json({
         partnerId: id,
         connected: partner.connected,
         language: partner.language,
         gender: partner.gender,
-        malePartnerName: partner.malePartnerName,
-        femalePartnerName: partner.femalePartnerName
+        malePartnerName:
+          partner.male_partner_name || "",
+        femalePartnerName:
+          partner.female_partner_name || ""
       });
-
     } catch (error) {
       console.error("Get profile error:", error);
 
@@ -423,8 +765,12 @@ app.listen(PORT, () => {
   );
 
   if (checkSupabaseConfig()) {
-    console.log("Supabase environment configuration detected.");
+    console.log(
+      "Supabase environment configuration detected."
+    );
   } else {
-    console.log("WARNING: Supabase environment variables are missing.");
+    console.log(
+      "WARNING: Supabase environment variables are missing."
+    );
   }
 });
