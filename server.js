@@ -1,14 +1,31 @@
+require("dotenv").config();
+
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) {
+    console.error("Missing SUPABASE_URL or SUPABASE_SECRET_KEY in .env");
+    process.exit(1);
+}
+
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SECRET_KEY,
+    {
+        auth: {
+            persistSession: false,
+            autoRefreshToken: false
+        }
+    }
+);
+
 app.use(express.json());
 app.use(express.static(__dirname));
-
-const couples = new Map();
 
 const optionPools = {
     q4: [
@@ -21,6 +38,7 @@ const optionPools = {
         ["Strawberry", "images/strawberry.jpg"],
         ["Banana", "images/banana.jpg"]
     ],
+
     q5: [
         ["Pizza", "images/pizza.jpg"],
         ["Burger", "images/burger.jpg"],
@@ -31,6 +49,7 @@ const optionPools = {
         ["Chicken", "images/chicken.jpg"],
         ["Seafood", "images/seafood.jpg"]
     ],
+
     q6: [
         ["Tea", "images/tea.jpg"],
         ["Coffee", "images/coffee.jpg"],
@@ -41,6 +60,7 @@ const optionPools = {
         ["Chocolate Drink", "images/chocolate-drink.jpg"],
         ["Fruit Smoothie", "images/smoothie.jpg"]
     ],
+
     q7: [
         ["Beach", "images/beach.jpg"],
         ["Restaurant", "images/restaurant.jpg"],
@@ -51,6 +71,7 @@ const optionPools = {
         ["Cafe", "images/cafe.jpg"],
         ["Waterfall", "images/waterfall.jpg"]
     ],
+
     q8: [
         ["Sunny", "images/sunny.jpg"],
         ["Rainy", "images/rainy.jpg"],
@@ -61,6 +82,7 @@ const optionPools = {
         ["Sunset", "images/sunset.jpg"],
         ["Night", "images/night.jpg"]
     ],
+
     q9: [
         ["Dog", "images/dog.jpg"],
         ["Cat", "images/cat.jpg"],
@@ -71,6 +93,7 @@ const optionPools = {
         ["Parrot", "images/parrot.jpg"],
         ["Turtle", "images/turtle.jpg"]
     ],
+
     q10: [
         ["Rose", "images/rose.jpg"],
         ["Sunflower", "images/sunflower.jpg"],
@@ -81,6 +104,7 @@ const optionPools = {
         ["Jasmine", "images/jasmine.jpg"],
         ["Daisy", "images/daisy.jpg"]
     ],
+
     q11: [
         ["Red", "images/red.jpg"],
         ["Blue", "images/blue.jpg"],
@@ -91,6 +115,7 @@ const optionPools = {
         ["Green", "images/green.jpg"],
         ["Yellow", "images/yellow.jpg"]
     ],
+
     q12: [
         ["Romance", "images/romance.jpg"],
         ["Comedy", "images/comedy.jpg"],
@@ -101,6 +126,7 @@ const optionPools = {
         ["Mystery", "images/mystery.jpg"],
         ["Drama", "images/drama.jpg"]
     ],
+
     q13: [
         ["Stay Home", "images/stay-home.jpg"],
         ["Travel", "images/travel.jpg"],
@@ -111,6 +137,7 @@ const optionPools = {
         ["Sleep", "images/sleep.jpg"],
         ["Play Games", "images/games.jpg"]
     ],
+
     q14: [
         ["Flowers", "images/gift-flowers.jpg"],
         ["Chocolate", "images/chocolate.jpg"],
@@ -121,6 +148,7 @@ const optionPools = {
         ["Phone", "images/phone.jpg"],
         ["Surprise Date", "images/surprise-date.jpg"]
     ],
+
     q15: [
         ["Beach Trip", "images/trip-beach.jpg"],
         ["Mountain Trip", "images/trip-mountain.jpg"],
@@ -131,6 +159,7 @@ const optionPools = {
         ["Luxury Hotel", "images/luxury-hotel.jpg"],
         ["Foreign Trip", "images/foreign-trip.jpg"]
     ],
+
     q16: [
         ["Dinner Date", "images/dinner-date.jpg"],
         ["Long Drive", "images/long-drive.jpg"],
@@ -141,6 +170,7 @@ const optionPools = {
         ["Coffee Date", "images/coffee-date.jpg"],
         ["Sunset Date", "images/sunset-date.jpg"]
     ],
+
     q17: [
         ["Ice Cream", "images/icecream.jpg"],
         ["Cake", "images/cake.jpg"],
@@ -151,6 +181,7 @@ const optionPools = {
         ["Fruit Salad", "images/fruit-salad.jpg"],
         ["Waffle", "images/waffle.jpg"]
     ],
+
     q18: [
         ["iPhone", "images/iphone.jpg"],
         ["Samsung", "images/samsung.jpg"],
@@ -161,6 +192,7 @@ const optionPools = {
         ["OnePlus", "images/oneplus.jpg"],
         ["Sony", "images/sony.jpg"]
     ],
+
     q19: [
         ["Facebook", "images/facebook.jpg"],
         ["TikTok", "images/tiktok.jpg"],
@@ -171,6 +203,7 @@ const optionPools = {
         ["X", "images/x.jpg"],
         ["Telegram", "images/telegram.jpg"]
     ],
+
     q20: [
         ["Happy Family", "images/happy-family.jpg"],
         ["Travel World", "images/world-travel.jpg"],
@@ -182,10 +215,6 @@ const optionPools = {
         ["Adventure Life", "images/adventure-life.jpg"]
     ]
 };
-
-function getCouple(coupleId) {
-    return couples.get(coupleId);
-}
 
 function validPartnerId(partnerId) {
     const id = Number(partnerId);
@@ -251,7 +280,72 @@ function createSharedOptionSets() {
     return optionSets;
 }
 
-// CREATE COUPLE
+function createQuestionOrder() {
+    return shuffleArray(
+        Array.from({ length: 20 }, (_, index) => "q" + (index + 1))
+    );
+}
+
+async function getCouple(coupleId) {
+    const { data, error } = await supabase
+        .from("couples")
+        .select("*")
+        .eq("id", coupleId)
+        .maybeSingle();
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+}
+
+async function getPartner(coupleId, partnerNumber) {
+    const { data, error } = await supabase
+        .from("partners")
+        .select("*")
+        .eq("couple_id", coupleId)
+        .eq("partner_number", partnerNumber)
+        .maybeSingle();
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+}
+
+async function getBothPartners(coupleId) {
+    const { data, error } = await supabase
+        .from("partners")
+        .select("*")
+        .eq("couple_id", coupleId)
+        .order("partner_number", { ascending: true });
+
+    if (error) {
+        throw error;
+    }
+
+    const partner1 =
+        data.find(item => item.partner_number === 1) || null;
+
+    const partner2 =
+        data.find(item => item.partner_number === 2) || null;
+
+    return {
+        partner1,
+        partner2
+    };
+}
+
+function partnerResponse(partner) {
+    return {
+        connected: Boolean(partner?.connected),
+        language: partner?.language ?? null,
+        gender: partner?.gender ?? null
+    };
+}
+
 app.post("/api/couples/create", async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -262,55 +356,96 @@ app.post("/api/couples/create", async (req, res) => {
             });
         }
 
-        const coupleId = crypto.randomUUID();
-        const coupleCode =
-            crypto.randomBytes(4).toString("hex").toUpperCase();
+        const cleanUsername = username.trim();
+
+        if (!cleanUsername) {
+            return res.status(400).json({
+                message: "Username and Password are required."
+            });
+        }
 
         const passwordHash = await bcrypt.hash(password, 10);
 
-        couples.set(coupleId, {
-            coupleId,
-            coupleCode,
-            username: username.trim(),
-            passwordHash,
-            partners: 1,
-            status: "Waiting for partner",
-            optionSets: createSharedOptionSets(),
+        let coupleCode;
+        let codeAvailable = false;
 
-            partner1: {
+        while (!codeAvailable) {
+            coupleCode =
+                crypto.randomBytes(4).toString("hex").toUpperCase();
+
+            const { data, error } = await supabase
+                .from("couples")
+                .select("id")
+                .eq("couple_code", coupleCode)
+                .maybeSingle();
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data) {
+                codeAvailable = true;
+            }
+        }
+
+        const optionSets = createSharedOptionSets();
+
+        const { data: couple, error: coupleError } = await supabase
+            .from("couples")
+            .insert({
+                couple_code: coupleCode,
+                username: cleanUsername,
+                password_hash: passwordHash,
+                partners: 1,
+                status: "Waiting for partner",
+                option_sets: optionSets
+            })
+            .select()
+            .single();
+
+        if (coupleError) {
+            if (coupleError.code === "23505") {
+                return res.status(409).json({
+                    message: "Username already exists."
+                });
+            }
+
+            throw coupleError;
+        }
+
+        const { error: partnerError } = await supabase
+            .from("partners")
+            .insert({
+                couple_id: couple.id,
+                partner_number: 1,
                 connected: true,
                 language: null,
                 gender: null,
-                malePartnerName: "",
-                femalePartnerName: "",
-                actualAnswers: null,
+                male_partner_name: "",
+                female_partner_name: "",
+                actual_answers: null,
                 guesses: null,
-                page4Completed: false,
-                page5Completed: false
-            },
+                page4_completed: false,
+                page5_completed: false,
+                question_order: createQuestionOrder()
+            });
 
-            partner2: {
-                connected: false,
-                language: null,
-                gender: null,
-                malePartnerName: "",
-                femalePartnerName: "",
-                actualAnswers: null,
-                guesses: null,
-                page4Completed: false,
-                page5Completed: false
-            },
+        if (partnerError) {
+            await supabase
+                .from("couples")
+                .delete()
+                .eq("id", couple.id);
 
-            createdAt: new Date().toISOString()
-        });
+            throw partnerError;
+        }
 
         res.status(201).json({
             message: "Couple Account created successfully ❤️",
-            coupleId,
-            coupleCode,
-            username: username.trim(),
+            coupleId: couple.id,
+            coupleCode: couple.couple_code,
+            username: couple.username,
             partnerId: 1,
-            status: "Waiting for partner"
+            status: couple.status
         });
 
     } catch (error) {
@@ -322,8 +457,7 @@ app.post("/api/couples/create", async (req, res) => {
     }
 });
 
-// JOIN COUPLE
-app.post("/api/couples/join", (req, res) => {
+app.post("/api/couples/join", async (req, res) => {
     try {
         const { coupleCode } = req.body;
 
@@ -335,9 +469,15 @@ app.post("/api/couples/join", (req, res) => {
 
         const code = coupleCode.trim().toUpperCase();
 
-        const couple = Array.from(couples.values()).find(
-            item => item.coupleCode === code
-        );
+        const { data: couple, error } = await supabase
+            .from("couples")
+            .select("*")
+            .eq("couple_code", code)
+            .maybeSingle();
+
+        if (error) {
+            throw error;
+        }
 
         if (!couple) {
             return res.status(404).json({
@@ -351,17 +491,64 @@ app.post("/api/couples/join", (req, res) => {
             });
         }
 
-        couple.partners = 2;
-        couple.partner2.connected = true;
-        couple.status = "Our Couple is Connected ❤️";
+        const existingPartner2 =
+            await getPartner(couple.id, 2);
+
+        if (existingPartner2) {
+            return res.status(403).json({
+                message: "This Couple Account is already full."
+            });
+        }
+
+        const { error: partnerError } = await supabase
+            .from("partners")
+            .insert({
+                couple_id: couple.id,
+                partner_number: 2,
+                connected: true,
+                language: null,
+                gender: null,
+                male_partner_name: "",
+                female_partner_name: "",
+                actual_answers: null,
+                guesses: null,
+                page4_completed: false,
+                page5_completed: false,
+                question_order: createQuestionOrder()
+            });
+
+        if (partnerError) {
+            if (partnerError.code === "23505") {
+                return res.status(403).json({
+                    message: "This Couple Account is already full."
+                });
+            }
+
+            throw partnerError;
+        }
+
+        const { data: updatedCouple, error: updateError } =
+            await supabase
+                .from("couples")
+                .update({
+                    partners: 2,
+                    status: "Our Couple is Connected ❤️"
+                })
+                .eq("id", couple.id)
+                .select()
+                .single();
+
+        if (updateError) {
+            throw updateError;
+        }
 
         res.json({
             message: "Our Couple is Connected ❤️",
-            coupleId: couple.coupleId,
-            coupleCode: couple.coupleCode,
-            username: couple.username,
+            coupleId: updatedCouple.id,
+            coupleCode: updatedCouple.couple_code,
+            username: updatedCouple.username,
             partnerId: 2,
-            status: couple.status
+            status: updatedCouple.status
         });
 
     } catch (error) {
@@ -373,17 +560,36 @@ app.post("/api/couples/join", (req, res) => {
     }
 });
 
-// COUPLE COUNT
-app.get("/api/couples/count", (req, res) => {
-    res.json({
-        totalCouples: couples.size
-    });
+app.get("/api/couples/count", async (req, res) => {
+    try {
+        const { count, error } = await supabase
+            .from("couples")
+            .select("*", {
+                count: "exact",
+                head: true
+            });
+
+        if (error) {
+            throw error;
+        }
+
+        res.json({
+            totalCouples: count || 0
+        });
+
+    } catch (error) {
+        console.error("COUPLE COUNT ERROR:", error);
+
+        res.status(500).json({
+            message: "Server error."
+        });
+    }
 });
 
-// CONNECTION STATUS
-app.get("/api/couples/:coupleId/status", (req, res) => {
+app.get("/api/couples/:coupleId/status", async (req, res) => {
     try {
-        const couple = getCouple(req.params.coupleId);
+        const couple =
+            await getCouple(req.params.coupleId);
 
         if (!couple) {
             return res.status(404).json({
@@ -391,22 +597,19 @@ app.get("/api/couples/:coupleId/status", (req, res) => {
             });
         }
 
+        const {
+            partner1,
+            partner2
+        } = await getBothPartners(couple.id);
+
         res.json({
-            coupleId: couple.coupleId,
+            coupleId: couple.id,
             status: couple.status,
             partners: couple.partners,
 
-            partner1: {
-                connected: couple.partner1.connected,
-                language: couple.partner1.language,
-                gender: couple.partner1.gender
-            },
+            partner1: partnerResponse(partner1),
 
-            partner2: {
-                connected: couple.partner2.connected,
-                language: couple.partner2.language,
-                gender: couple.partner2.gender
-            }
+            partner2: partnerResponse(partner2)
         });
 
     } catch (error) {
@@ -418,10 +621,10 @@ app.get("/api/couples/:coupleId/status", (req, res) => {
     }
 });
 
-// SAVE PROFILE
-app.post("/api/couples/:coupleId/profile", (req, res) => {
+app.post("/api/couples/:coupleId/profile", async (req, res) => {
     try {
-        const couple = getCouple(req.params.coupleId);
+        const couple =
+            await getCouple(req.params.coupleId);
 
         const {
             partnerId,
@@ -475,32 +678,48 @@ app.post("/api/couples/:coupleId/profile", (req, res) => {
         }
 
         const partner =
-            id === 1
-                ? couple.partner1
-                : couple.partner2;
+            await getPartner(couple.id, id);
 
-        partner.language = language;
-        partner.gender = gender;
-        partner.malePartnerName =
-            malePartnerName.trim();
+        if (!partner) {
+            return res.status(404).json({
+                message: "Partner not found."
+            });
+        }
 
-        partner.femalePartnerName =
-            femalePartnerName.trim();
+        const { data: updatedPartner, error } =
+            await supabase
+                .from("partners")
+                .update({
+                    language,
+                    gender,
+                    male_partner_name:
+                        malePartnerName.trim(),
+                    female_partner_name:
+                        femalePartnerName.trim()
+                })
+                .eq("couple_id", couple.id)
+                .eq("partner_number", id)
+                .select()
+                .single();
+
+        if (error) {
+            throw error;
+        }
 
         res.json({
             message:
                 "Partner profile saved successfully ❤️",
 
-            coupleId: couple.coupleId,
+            coupleId: couple.id,
             partnerId: id,
 
             profile: {
-                language: partner.language,
-                gender: partner.gender,
+                language: updatedPartner.language,
+                gender: updatedPartner.gender,
                 malePartnerName:
-                    partner.malePartnerName,
+                    updatedPartner.male_partner_name,
                 femalePartnerName:
-                    partner.femalePartnerName
+                    updatedPartner.female_partner_name
             }
         });
 
@@ -516,13 +735,12 @@ app.post("/api/couples/:coupleId/profile", (req, res) => {
     }
 });
 
-// GET PROFILE
 app.get(
     "/api/couples/:coupleId/profile/:partnerId",
-    (req, res) => {
+    async (req, res) => {
         try {
             const couple =
-                getCouple(req.params.coupleId);
+                await getCouple(req.params.coupleId);
 
             if (!couple) {
                 return res.status(404).json({
@@ -542,9 +760,13 @@ app.get(
             }
 
             const partner =
-                id === 1
-                    ? couple.partner1
-                    : couple.partner2;
+                await getPartner(couple.id, id);
+
+            if (!partner) {
+                return res.status(404).json({
+                    message: "Partner not found."
+                });
+            }
 
             res.json({
                 partnerId: id,
@@ -552,9 +774,9 @@ app.get(
                 language: partner.language,
                 gender: partner.gender,
                 malePartnerName:
-                    partner.malePartnerName,
+                    partner.male_partner_name,
                 femalePartnerName:
-                    partner.femalePartnerName
+                    partner.female_partner_name
             });
 
         } catch (error) {
@@ -570,13 +792,12 @@ app.get(
     }
 );
 
-// GET QUIZ OPTIONS
 app.get(
     "/api/couples/:coupleId/quiz/options",
-    (req, res) => {
+    async (req, res) => {
         try {
             const couple =
-                getCouple(req.params.coupleId);
+                await getCouple(req.params.coupleId);
 
             if (!couple) {
                 return res.status(404).json({
@@ -585,8 +806,9 @@ app.get(
             }
 
             res.json({
-                coupleId: couple.coupleId,
-                optionSets: couple.optionSets
+                coupleId: couple.id,
+                optionSets:
+                    couple.option_sets || {}
             });
 
         } catch (error) {
@@ -602,13 +824,94 @@ app.get(
     }
 );
 
-// SAVE PAGE 4 ACTUAL ANSWERS
-app.post(
-    "/api/couples/:coupleId/quiz/actual",
-    (req, res) => {
+app.get(
+    "/api/couples/:coupleId/quiz/order/:partnerId",
+    async (req, res) => {
         try {
             const couple =
-                getCouple(req.params.coupleId);
+                await getCouple(req.params.coupleId);
+
+            if (!couple) {
+                return res.status(404).json({
+                    message: "Couple not found."
+                });
+            }
+
+            const id =
+                validPartnerId(
+                    req.params.partnerId
+                );
+
+            if (!id) {
+                return res.status(400).json({
+                    message: "Invalid Partner ID."
+                });
+            }
+
+            let partner =
+                await getPartner(couple.id, id);
+
+            if (!partner) {
+                return res.status(404).json({
+                    message: "Partner not found."
+                });
+            }
+
+            let questionOrder =
+                partner.question_order;
+
+            if (
+                !Array.isArray(questionOrder) ||
+                questionOrder.length !== 20
+            ) {
+                questionOrder =
+                    createQuestionOrder();
+
+                const { data, error } =
+                    await supabase
+                        .from("partners")
+                        .update({
+                            question_order:
+                                questionOrder
+                        })
+                        .eq("couple_id", couple.id)
+                        .eq("partner_number", id)
+                        .select()
+                        .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                partner = data;
+            }
+
+            res.json({
+                coupleId: couple.id,
+                partnerId: id,
+                questionOrder:
+                    partner.question_order
+            });
+
+        } catch (error) {
+            console.error(
+                "QUESTION ORDER ERROR:",
+                error
+            );
+
+            res.status(500).json({
+                message: "Server error."
+            });
+        }
+    }
+);
+
+app.post(
+    "/api/couples/:coupleId/quiz/actual",
+    async (req, res) => {
+        try {
+            const couple =
+                await getCouple(req.params.coupleId);
 
             const {
                 partnerId,
@@ -640,18 +943,34 @@ app.post(
             }
 
             const partner =
-                id === 1
-                    ? couple.partner1
-                    : couple.partner2;
+                await getPartner(couple.id, id);
 
-            partner.actualAnswers =
+            if (!partner) {
+                return res.status(404).json({
+                    message: "Partner not found."
+                });
+            }
+
+            const cleanedAnswers =
                 cleanAnswers(answers);
 
-            partner.page4Completed = true;
+            const { error } = await supabase
+                .from("partners")
+                .update({
+                    actual_answers:
+                        cleanedAnswers,
+                    page4_completed: true
+                })
+                .eq("couple_id", couple.id)
+                .eq("partner_number", id);
+
+            if (error) {
+                throw error;
+            }
 
             console.log(
                 "PAGE 4 SAVED:",
-                couple.coupleId,
+                couple.id,
                 "Partner:",
                 id
             );
@@ -660,7 +979,7 @@ app.post(
                 message:
                     "Page 4 answers saved successfully ❤️",
 
-                coupleId: couple.coupleId,
+                coupleId: couple.id,
                 partnerId: id,
                 page4Completed: true
             });
@@ -678,13 +997,12 @@ app.post(
     }
 );
 
-// SAVE PAGE 5 GUESSES
 app.post(
     "/api/couples/:coupleId/quiz/guesses",
-    (req, res) => {
+    async (req, res) => {
         try {
             const couple =
-                getCouple(req.params.coupleId);
+                await getCouple(req.params.coupleId);
 
             const {
                 partnerId,
@@ -716,18 +1034,34 @@ app.post(
             }
 
             const partner =
-                id === 1
-                    ? couple.partner1
-                    : couple.partner2;
+                await getPartner(couple.id, id);
 
-            partner.guesses =
+            if (!partner) {
+                return res.status(404).json({
+                    message: "Partner not found."
+                });
+            }
+
+            const cleanedGuesses =
                 cleanAnswers(guesses);
 
-            partner.page5Completed = true;
+            const { error } = await supabase
+                .from("partners")
+                .update({
+                    guesses:
+                        cleanedGuesses,
+                    page5_completed: true
+                })
+                .eq("couple_id", couple.id)
+                .eq("partner_number", id);
+
+            if (error) {
+                throw error;
+            }
 
             console.log(
                 "PAGE 5 GUESSES SAVED:",
-                couple.coupleId,
+                couple.id,
                 "Partner:",
                 id
             );
@@ -736,7 +1070,7 @@ app.post(
                 message:
                     "Page 5 guesses saved successfully ❤️",
 
-                coupleId: couple.coupleId,
+                coupleId: couple.id,
                 partnerId: id,
                 page5Completed: true
             });
@@ -754,13 +1088,12 @@ app.post(
     }
 );
 
-// QUIZ RESULT
 app.get(
     "/api/couples/:coupleId/quiz-result",
-    (req, res) => {
+    async (req, res) => {
         try {
             const couple =
-                getCouple(req.params.coupleId);
+                await getCouple(req.params.coupleId);
 
             if (!couple) {
                 return res.status(404).json({
@@ -768,16 +1101,30 @@ app.get(
                 });
             }
 
-            const p1 = couple.partner1;
-            const p2 = couple.partner2;
+            const {
+                partner1: p1,
+                partner2: p2
+            } = await getBothPartners(couple.id);
+
+            if (!p1 || !p2) {
+                return res.json({
+                    bothCompleted: false,
+                    partner1Completed:
+                        Boolean(p1?.page5_completed),
+                    partner2Completed:
+                        Boolean(p2?.page5_completed),
+                    message:
+                        "Waiting for both partners to finish ❤️"
+                });
+            }
 
             const bothCompleted = Boolean(
-                p1.page4Completed &&
-                p2.page4Completed &&
-                p1.page5Completed &&
-                p2.page5Completed &&
-                p1.actualAnswers &&
-                p2.actualAnswers &&
+                p1.page4_completed &&
+                p2.page4_completed &&
+                p1.page5_completed &&
+                p2.page5_completed &&
+                p1.actual_answers &&
+                p2.actual_answers &&
                 p1.guesses &&
                 p2.guesses
             );
@@ -788,12 +1135,12 @@ app.get(
 
                     partner1Completed:
                         Boolean(
-                            p1.page5Completed
+                            p1.page5_completed
                         ),
 
                     partner2Completed:
                         Boolean(
-                            p2.page5Completed
+                            p2.page5_completed
                         ),
 
                     message:
@@ -804,13 +1151,13 @@ app.get(
             const partner1Correct =
                 compareAnswers(
                     p1.guesses,
-                    p2.actualAnswers
+                    p2.actual_answers
                 );
 
             const partner2Correct =
                 compareAnswers(
                     p2.guesses,
-                    p1.actualAnswers
+                    p1.actual_answers
                 );
 
             const partner1Score =
@@ -834,13 +1181,13 @@ app.get(
                 ) / 10;
 
             const maleName =
-                p1.malePartnerName ||
-                p2.malePartnerName ||
+                p1.male_partner_name ||
+                p2.male_partner_name ||
                 "Partner 1";
 
             const femaleName =
-                p1.femalePartnerName ||
-                p2.femalePartnerName ||
+                p1.female_partner_name ||
+                p2.female_partner_name ||
                 "Partner 2";
 
             res.json({
@@ -850,10 +1197,10 @@ app.get(
                 femaleName,
 
                 partner1Actual:
-                    p1.actualAnswers,
+                    p1.actual_answers,
 
                 partner2Actual:
-                    p2.actualAnswers,
+                    p2.actual_answers,
 
                 partner1Guesses:
                     p1.guesses,
@@ -883,7 +1230,6 @@ app.get(
     }
 );
 
-// START SERVER
 app.listen(PORT, () => {
     console.log(
         `Magic Miracle Couple Quiz server is running on http://localhost:${PORT}`
