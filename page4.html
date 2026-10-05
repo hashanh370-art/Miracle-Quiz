@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Miracle Quiz - Questions ❤️</title>
 
 <style>
@@ -17,7 +18,12 @@ body {
     font-family: Arial, sans-serif;
     color: white;
     background:
-        radial-gradient(circle at top, #42000b 0%, #170005 35%, #050505 72%);
+        radial-gradient(
+            circle at top,
+            #42000b 0%,
+            #170005 35%,
+            #050505 72%
+        );
 }
 
 .page {
@@ -43,8 +49,13 @@ body {
 }
 
 @keyframes heartbeat {
-    0%,100% { transform: scale(1); }
-    50% { transform: scale(1.12); }
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.12);
+    }
 }
 
 .logo {
@@ -83,7 +94,12 @@ body {
 .progress-fill {
     height: 100%;
     width: 5%;
-    background: linear-gradient(90deg, #c9002f, #ff3159);
+    background:
+        linear-gradient(
+            90deg,
+            #c9002f,
+            #ff3159
+        );
     transition: width .4s ease;
 }
 
@@ -94,8 +110,8 @@ body {
     background: rgba(18, 7, 10, .96);
     border: 1px solid rgba(255, 49, 89, .3);
     box-shadow:
-        0 20px 60px rgba(0,0,0,.55),
-        0 0 30px rgba(255,20,60,.07);
+        0 20px 60px rgba(0, 0, 0, .55),
+        0 0 30px rgba(255, 20, 60, .07);
 }
 
 .question-number {
@@ -124,7 +140,8 @@ body {
 
 .answer-input:focus {
     border-color: #ff3159;
-    box-shadow: 0 0 0 3px rgba(255,49,89,.12);
+    box-shadow:
+        0 0 0 3px rgba(255, 49, 89, .12);
 }
 
 .image-options {
@@ -151,7 +168,8 @@ body {
 
 .image-option.selected {
     border-color: #ff3159;
-    box-shadow: 0 0 25px rgba(255,49,89,.35);
+    box-shadow:
+        0 0 25px rgba(255, 49, 89, .35);
 }
 
 .image-option img {
@@ -180,7 +198,8 @@ body {
     justify-content: center;
     font-weight: bold;
     font-size: 20px;
-    box-shadow: 0 0 15px rgba(255,49,89,.7);
+    box-shadow:
+        0 0 15px rgba(255, 49, 89, .7);
 }
 
 .image-option.selected .tick {
@@ -210,8 +229,14 @@ body {
 }
 
 .next-btn {
-    background: linear-gradient(135deg, #c9002f, #ff3159);
-    box-shadow: 0 10px 30px rgba(255,25,70,.22);
+    background:
+        linear-gradient(
+            135deg,
+            #c9002f,
+            #ff3159
+        );
+    box-shadow:
+        0 10px 30px rgba(255, 25, 70, .22);
 }
 
 .btn:disabled {
@@ -226,7 +251,16 @@ body {
     font-size: 12px;
 }
 
-@media(max-width:650px) {
+.save-status {
+    min-height: 22px;
+    margin-top: 15px;
+    text-align: center;
+    color: #ff7891;
+    font-size: 14px;
+}
+
+@media(max-width: 650px) {
+
     .question-card {
         padding: 22px 15px;
     }
@@ -258,29 +292,50 @@ body {
 <body>
 
 <div class="page">
+
 <div class="container">
 
     <div class="header">
-        <div class="logo-heart">❤️</div>
-        <div class="logo">Miracle <span>Quiz</span></div>
-        <div class="brand">BY MIRACLE HEART</div>
 
-        <div class="progress-text" id="progressText">
+        <div class="logo-heart">
+            ❤️
+        </div>
+
+        <div class="logo">
+            Miracle <span>Quiz</span>
+        </div>
+
+        <div class="brand">
+            BY MIRACLE HEART
+        </div>
+
+        <div
+            class="progress-text"
+            id="progressText">
             Question 1 of 20
         </div>
 
         <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
+            <div
+                class="progress-fill"
+                id="progressFill">
+            </div>
         </div>
+
     </div>
 
     <div class="question-card">
 
-        <div class="question-number" id="questionNumber">
+        <div
+            class="question-number"
+            id="questionNumber">
             QUESTION 01
         </div>
 
-        <div class="question" id="questionText"></div>
+        <div
+            class="question"
+            id="questionText">
+        </div>
 
         <div id="answerArea"></div>
 
@@ -300,432 +355,1583 @@ body {
 
         </div>
 
-        <div class="note">
+        <div
+            class="save-status"
+            id="saveStatus">
+        </div>
+
+        <div
+            class="note"
+            id="noteText">
             Your answers will be used for your Miracle Quiz ❤️
         </div>
 
     </div>
 
 </div>
+
 </div>
 
 <script>
 
-const coupleId = localStorage.getItem("coupleId");
-const partnerId = localStorage.getItem("partnerId");
-const language = localStorage.getItem("language") || "English";
+/* =====================================================
+   COUPLE / PARTNER INFORMATION
+===================================================== */
 
-if (!coupleId) {
-    alert("Couple information not found.");
+const coupleId =
+    localStorage.getItem("coupleId");
+
+const partnerId =
+    localStorage.getItem("partnerId");
+
+const language =
+    localStorage.getItem("language") ||
+    "English";
+
+
+if (!coupleId || !partnerId) {
+
+    alert(
+        "Couple or Partner information not found."
+    );
+
     window.location.href = "/";
 }
 
-/*
-IMPORTANT:
-For image questions, JPG files go inside:
 
-MQ/images/
+/* =====================================================
+   TRANSLATION HELPERS
+===================================================== */
 
-Example:
-images/mango.jpg
-images/apple.jpg
-*/
+function textByLanguage(en, si, ta) {
+
+    if (language === "සිංහල") {
+        return si;
+    }
+
+    if (language === "தமிழ்") {
+        return ta;
+    }
+
+    return en;
+}
+
+
+function option(value, image, si, ta) {
+
+    return {
+        value: value,
+        image: image,
+
+        labels: {
+            en: value,
+            si: si,
+            ta: ta
+        }
+    };
+}
+
+
+function getOptionLabel(item) {
+
+    if (language === "සිංහල") {
+        return item.labels.si;
+    }
+
+    if (language === "தமிழ்") {
+        return item.labels.ta;
+    }
+
+    return item.labels.en;
+}
+
+
+/* =====================================================
+   QUESTIONS
+===================================================== */
 
 const questions = [
+
+/* Q1 */
 
 {
     id: "q1",
     type: "text",
+
     en: "What is your name?",
+
     si: "ඔබගේ නම කුමක්ද?",
+
     ta: "உங்கள் பெயர் என்ன?"
 },
+
+
+/* Q2 */
 
 {
     id: "q2",
     type: "text",
+
     en: "What is your birthday?",
+
     si: "ඔබගේ උපන්දිනය කවදාද?",
+
     ta: "உங்கள் பிறந்த நாள் எப்போது?"
 },
+
+
+/* Q3 */
 
 {
     id: "q3",
     type: "text",
+
     en: "Where do you live?",
+
     si: "ඔබ ජීවත් වන්නේ කොහේද?",
+
     ta: "நீங்கள் எங்கு வசிக்கிறீர்கள்?"
 },
+
+
+/* Q4 */
 
 {
     id: "q4",
     type: "image",
+
     en: "Which fruit do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති පලතුර කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த பழம் எது?",
+
     pool: [
-        ["Mango","images/mango.jpg"],
-        ["Apple","images/apple.jpg"],
-        ["Orange","images/orange.jpg"],
-        ["Grapes","images/grapes.jpg"],
-        ["Pineapple","images/pineapple.jpg"],
-        ["Watermelon","images/watermelon.jpg"],
-        ["Strawberry","images/strawberry.jpg"],
-        ["Banana","images/banana.jpg"]
+
+        option(
+            "Mango",
+            "images/mango.jpg",
+            "අඹ",
+            "மாம்பழம்"
+        ),
+
+        option(
+            "Apple",
+            "images/apple.jpg",
+            "ඇපල්",
+            "ஆப்பிள்"
+        ),
+
+        option(
+            "Orange",
+            "images/orange.jpg",
+            "දොඩම්",
+            "ஆரஞ்சு"
+        ),
+
+        option(
+            "Grapes",
+            "images/grapes.jpg",
+            "මිදි",
+            "திராட்சை"
+        ),
+
+        option(
+            "Pineapple",
+            "images/pineapple.jpg",
+            "අන්නාසි",
+            "அன்னாசி"
+        ),
+
+        option(
+            "Watermelon",
+            "images/watermelon.jpg",
+            "කොමඩු",
+            "தர்பூசணி"
+        ),
+
+        option(
+            "Strawberry",
+            "images/strawberry.jpg",
+            "ස්ට්‍රෝබෙරි",
+            "ஸ்ட்ராபெர்ரி"
+        ),
+
+        option(
+            "Banana",
+            "images/banana.jpg",
+            "කෙසෙල්",
+            "வாழைப்பழம்"
+        )
     ]
 },
+
+
+/* Q5 */
 
 {
     id: "q5",
     type: "image",
+
     en: "Which food do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති කෑම කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த உணவு எது?",
+
     pool: [
-        ["Pizza","images/pizza.jpg"],
-        ["Burger","images/burger.jpg"],
-        ["Rice","images/rice.jpg"],
-        ["Noodles","images/noodles.jpg"],
-        ["Kottu","images/kottu.jpg"],
-        ["Pasta","images/pasta.jpg"],
-        ["Chicken","images/chicken.jpg"],
-        ["Seafood","images/seafood.jpg"]
+
+        option(
+            "Pizza",
+            "images/pizza.jpg",
+            "පීසා",
+            "பீட்சா"
+        ),
+
+        option(
+            "Burger",
+            "images/burger.jpg",
+            "බර්ගර්",
+            "பர்கர்"
+        ),
+
+        option(
+            "Rice",
+            "images/rice.jpg",
+            "බත්",
+            "சாதம்"
+        ),
+
+        option(
+            "Noodles",
+            "images/noodles.jpg",
+            "නූඩ්ල්ස්",
+            "நூடுல்ஸ்"
+        ),
+
+        option(
+            "Kottu",
+            "images/kottu.jpg",
+            "කොත්තු",
+            "கொத்து"
+        ),
+
+        option(
+            "Pasta",
+            "images/pasta.jpg",
+            "පැස්ටා",
+            "பாஸ்தா"
+        ),
+
+        option(
+            "Chicken",
+            "images/chicken.jpg",
+            "කුකුල් මස්",
+            "கோழி இறைச்சி"
+        ),
+
+        option(
+            "Seafood",
+            "images/seafood.jpg",
+            "මුහුදු ආහාර",
+            "கடல் உணவு"
+        )
     ]
 },
+
+
+/* Q6 */
 
 {
     id: "q6",
     type: "image",
+
     en: "Which drink do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති පානය කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த பானம் எது?",
+
     pool: [
-        ["Tea","images/tea.jpg"],
-        ["Coffee","images/coffee.jpg"],
-        ["Juice","images/juice.jpg"],
-        ["Soft Drink","images/softdrink.jpg"],
-        ["Milkshake","images/milkshake.jpg"],
-        ["Water","images/water.jpg"],
-        ["Chocolate Drink","images/chocolate-drink.jpg"],
-        ["Fruit Smoothie","images/smoothie.jpg"]
+
+        option(
+            "Tea",
+            "images/tea.jpg",
+            "තේ",
+            "தேநீர்"
+        ),
+
+        option(
+            "Coffee",
+            "images/coffee.jpg",
+            "කෝපි",
+            "காபி"
+        ),
+
+        option(
+            "Juice",
+            "images/juice.jpg",
+            "පළතුරු යුෂ",
+            "பழச்சாறு"
+        ),
+
+        option(
+            "Soft Drink",
+            "images/softdrink.jpg",
+            "සිසිල් බීම",
+            "குளிர்பானம்"
+        ),
+
+        option(
+            "Milkshake",
+            "images/milkshake.jpg",
+            "මිල්ක්ෂේක්",
+            "மில்க்ஷேக்"
+        ),
+
+        option(
+            "Water",
+            "images/water.jpg",
+            "වතුර",
+            "தண்ணீர்"
+        ),
+
+        option(
+            "Chocolate Drink",
+            "images/chocolate-drink.jpg",
+            "චොකලට් පානය",
+            "சாக்லேட் பானம்"
+        ),
+
+        option(
+            "Fruit Smoothie",
+            "images/smoothie.jpg",
+            "පළතුරු ස්මූති",
+            "பழ ஸ்மூத்தி"
+        )
     ]
 },
+
+
+/* Q7 */
 
 {
     id: "q7",
     type: "image",
+
     en: "Which place would you choose for a romantic date?",
+
     si: "ආදරණීය හමුවකට ඔබ තෝරාගන්නේ කුමන ස්ථානයද?",
+
     ta: "காதல் சந்திப்பிற்கு எந்த இடத்தை தேர்வு செய்வீர்கள்?",
+
     pool: [
-        ["Beach","images/beach.jpg"],
-        ["Restaurant","images/restaurant.jpg"],
-        ["Cinema","images/cinema.jpg"],
-        ["Park","images/park.jpg"],
-        ["Mountain","images/mountain.jpg"],
-        ["Hotel","images/hotel.jpg"],
-        ["Cafe","images/cafe.jpg"],
-        ["Waterfall","images/waterfall.jpg"]
+
+        option(
+            "Beach",
+            "images/beach.jpg",
+            "මුහුදු වෙරළ",
+            "கடற்கரை"
+        ),
+
+        option(
+            "Restaurant",
+            "images/restaurant.jpg",
+            "අවන්හල",
+            "உணவகம்"
+        ),
+
+        option(
+            "Cinema",
+            "images/cinema.jpg",
+            "සිනමා ශාලාව",
+            "திரையரங்கம்"
+        ),
+
+        option(
+            "Park",
+            "images/park.jpg",
+            "උද්‍යානය",
+            "பூங்கா"
+        ),
+
+        option(
+            "Mountain",
+            "images/mountain.jpg",
+            "කඳුකරය",
+            "மலை"
+        ),
+
+        option(
+            "Hotel",
+            "images/hotel.jpg",
+            "හෝටලය",
+            "ஹோட்டல்"
+        ),
+
+        option(
+            "Cafe",
+            "images/cafe.jpg",
+            "කැෆේ",
+            "கஃபே"
+        ),
+
+        option(
+            "Waterfall",
+            "images/waterfall.jpg",
+            "දිය ඇල්ල",
+            "நீர்வீழ்ச்சி"
+        )
     ]
 },
+
+
+/* Q8 */
 
 {
     id: "q8",
     type: "image",
+
     en: "Which type of weather do you like?",
+
     si: "ඔබ කැමති කාලගුණය කුමක්ද?",
+
     ta: "உங்களுக்கு பிடித்த காலநிலை எது?",
+
     pool: [
-        ["Sunny","images/sunny.jpg"],
-        ["Rainy","images/rainy.jpg"],
-        ["Cloudy","images/cloudy.jpg"],
-        ["Cool","images/cool.jpg"],
-        ["Snowy","images/snowy.jpg"],
-        ["Windy","images/windy.jpg"],
-        ["Sunset","images/sunset.jpg"],
-        ["Night","images/night.jpg"]
+
+        option(
+            "Sunny",
+            "images/sunny.jpg",
+            "හිරු එළිය සහිත",
+            "வெயில்"
+        ),
+
+        option(
+            "Rainy",
+            "images/rainy.jpg",
+            "වැසි සහිත",
+            "மழை"
+        ),
+
+        option(
+            "Cloudy",
+            "images/cloudy.jpg",
+            "වලාකුළු සහිත",
+            "மேகமூட்டம்"
+        ),
+
+        option(
+            "Cool",
+            "images/cool.jpg",
+            "සිසිල්",
+            "குளிர்ச்சி"
+        ),
+
+        option(
+            "Snowy",
+            "images/snowy.jpg",
+            "හිම සහිත",
+            "பனி"
+        ),
+
+        option(
+            "Windy",
+            "images/windy.jpg",
+            "සුළං සහිත",
+            "காற்று"
+        ),
+
+        option(
+            "Sunset",
+            "images/sunset.jpg",
+            "හිරු බැස යන වේලාව",
+            "சூரிய அஸ்தமனம்"
+        ),
+
+        option(
+            "Night",
+            "images/night.jpg",
+            "රාත්‍රිය",
+            "இரவு"
+        )
     ]
 },
+
+
+/* Q9 */
 
 {
     id: "q9",
     type: "image",
+
     en: "Which pet do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති සුරතලා කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த செல்லப்பிராணி எது?",
+
     pool: [
-        ["Dog","images/dog.jpg"],
-        ["Cat","images/cat.jpg"],
-        ["Bird","images/bird.jpg"],
-        ["Rabbit","images/rabbit.jpg"],
-        ["Fish","images/fish.jpg"],
-        ["Hamster","images/hamster.jpg"],
-        ["Parrot","images/parrot.jpg"],
-        ["Turtle","images/turtle.jpg"]
+
+        option(
+            "Dog",
+            "images/dog.jpg",
+            "බල්ලා",
+            "நாய்"
+        ),
+
+        option(
+            "Cat",
+            "images/cat.jpg",
+            "පූසා",
+            "பூனை"
+        ),
+
+        option(
+            "Bird",
+            "images/bird.jpg",
+            "කුරුල්ලා",
+            "பறவை"
+        ),
+
+        option(
+            "Rabbit",
+            "images/rabbit.jpg",
+            "හාවා",
+            "முயல்"
+        ),
+
+        option(
+            "Fish",
+            "images/fish.jpg",
+            "මාළුවා",
+            "மீன்"
+        ),
+
+        option(
+            "Hamster",
+            "images/hamster.jpg",
+            "හැම්ස්ටර්",
+            "ஹாம்ஸ்டர்"
+        ),
+
+        option(
+            "Parrot",
+            "images/parrot.jpg",
+            "ගිරවා",
+            "கிளி"
+        ),
+
+        option(
+            "Turtle",
+            "images/turtle.jpg",
+            "කැස්බෑවා",
+            "ஆமை"
+        )
     ]
 },
+
+
+/* Q10 */
 
 {
     id: "q10",
     type: "image",
+
     en: "Which flower do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති මල කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த மலர் எது?",
+
     pool: [
-        ["Rose","images/rose.jpg"],
-        ["Sunflower","images/sunflower.jpg"],
-        ["Lotus","images/lotus.jpg"],
-        ["Lily","images/lily.jpg"],
-        ["Tulip","images/tulip.jpg"],
-        ["Orchid","images/orchid.jpg"],
-        ["Jasmine","images/jasmine.jpg"],
-        ["Daisy","images/daisy.jpg"]
+
+        option(
+            "Rose",
+            "images/rose.jpg",
+            "රෝස",
+            "ரோஜா"
+        ),
+
+        option(
+            "Sunflower",
+            "images/sunflower.jpg",
+            "සූරියකාන්ත",
+            "சூரியகாந்தி"
+        ),
+
+        option(
+            "Lotus",
+            "images/lotus.jpg",
+            "නෙළුම්",
+            "தாமரை"
+        ),
+
+        option(
+            "Lily",
+            "images/lily.jpg",
+            "ලිලී",
+            "லில்லி"
+        ),
+
+        option(
+            "Tulip",
+            "images/tulip.jpg",
+            "ටියුලිප්",
+            "ட்யூலிப்"
+        ),
+
+        option(
+            "Orchid",
+            "images/orchid.jpg",
+            "ඕකිඩ්",
+            "ஆர்க்கிட்"
+        ),
+
+        option(
+            "Jasmine",
+            "images/jasmine.jpg",
+            "පිච්ච",
+            "மல்லிகை"
+        ),
+
+        option(
+            "Daisy",
+            "images/daisy.jpg",
+            "ඩේසි",
+            "டெய்சி"
+        )
     ]
 },
+
+
+/* Q11 */
 
 {
     id: "q11",
     type: "image",
+
     en: "Which color do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති පාට කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த நிறம் எது?",
+
     pool: [
-        ["Red","images/red.jpg"],
-        ["Blue","images/blue.jpg"],
-        ["Black","images/black.jpg"],
-        ["White","images/white.jpg"],
-        ["Pink","images/pink.jpg"],
-        ["Purple","images/purple.jpg"],
-        ["Green","images/green.jpg"],
-        ["Yellow","images/yellow.jpg"]
+
+        option(
+            "Red",
+            "images/red.jpg",
+            "රතු",
+            "சிவப்பு"
+        ),
+
+        option(
+            "Blue",
+            "images/blue.jpg",
+            "නිල්",
+            "நீலம்"
+        ),
+
+        option(
+            "Black",
+            "images/black.jpg",
+            "කළු",
+            "கருப்பு"
+        ),
+
+        option(
+            "White",
+            "images/white.jpg",
+            "සුදු",
+            "வெள்ளை"
+        ),
+
+        option(
+            "Pink",
+            "images/pink.jpg",
+            "රෝස පාට",
+            "இளஞ்சிவப்பு"
+        ),
+
+        option(
+            "Purple",
+            "images/purple.jpg",
+            "දම්",
+            "ஊதா"
+        ),
+
+        option(
+            "Green",
+            "images/green.jpg",
+            "කොළ",
+            "பச்சை"
+        ),
+
+        option(
+            "Yellow",
+            "images/yellow.jpg",
+            "කහ",
+            "மஞ்சள்"
+        )
     ]
 },
+
+
+/* Q12 */
 
 {
     id: "q12",
     type: "image",
+
     en: "Which type of movie do you like?",
+
     si: "ඔබ කැමති චිත්‍රපට වර්ගය කුමක්ද?",
+
     ta: "உங்களுக்கு பிடித்த திரைப்பட வகை எது?",
+
     pool: [
-        ["Romance","images/romance.jpg"],
-        ["Comedy","images/comedy.jpg"],
-        ["Action","images/action.jpg"],
-        ["Horror","images/horror.jpg"],
-        ["Adventure","images/adventure.jpg"],
-        ["Animation","images/animation.jpg"],
-        ["Mystery","images/mystery.jpg"],
-        ["Drama","images/drama.jpg"]
+
+        option(
+            "Romance",
+            "images/romance.jpg",
+            "ආදර",
+            "காதல்"
+        ),
+
+        option(
+            "Comedy",
+            "images/comedy.jpg",
+            "විකට",
+            "நகைச்சுவை"
+        ),
+
+        option(
+            "Action",
+            "images/action.jpg",
+            "ක්‍රියාදාම",
+            "அதிரடி"
+        ),
+
+        option(
+            "Horror",
+            "images/horror.jpg",
+            "භීෂණ",
+            "திகில்"
+        ),
+
+        option(
+            "Adventure",
+            "images/adventure.jpg",
+            "ත්‍රාසජනක",
+            "சாகசம்"
+        ),
+
+        option(
+            "Animation",
+            "images/animation.jpg",
+            "සජීවිකරණ",
+            "அனிமேஷன்"
+        ),
+
+        option(
+            "Mystery",
+            "images/mystery.jpg",
+            "අභිරහස්",
+            "மர்மம்"
+        ),
+
+        option(
+            "Drama",
+            "images/drama.jpg",
+            "නාට්‍යමය",
+            "நாடகம்"
+        )
     ]
 },
+
+
+/* Q13 */
 
 {
     id: "q13",
     type: "image",
+
     en: "What would you prefer to do on a free day?",
+
     si: "නිවාඩු දවසක ඔබ කරන්න වැඩිපුරම කැමති දේ කුමක්ද?",
+
     ta: "விடுமுறை நாளில் நீங்கள் என்ன செய்ய விரும்புவீர்கள்?",
+
     pool: [
-        ["Stay Home","images/stay-home.jpg"],
-        ["Travel","images/travel.jpg"],
-        ["Shopping","images/shopping.jpg"],
-        ["Meet Friends","images/friends.jpg"],
-        ["Watch Movies","images/watch-movie.jpg"],
-        ["Go to Beach","images/beach-day.jpg"],
-        ["Sleep","images/sleep.jpg"],
-        ["Play Games","images/games.jpg"]
+
+        option(
+            "Stay Home",
+            "images/stay-home.jpg",
+            "ගෙදර ඉන්න",
+            "வீட்டில் இருப்பது"
+        ),
+
+        option(
+            "Travel",
+            "images/travel.jpg",
+            "සංචාරය කරන්න",
+            "பயணம்"
+        ),
+
+        option(
+            "Shopping",
+            "images/shopping.jpg",
+            "සාප්පු සවාරි",
+            "ஷாப்பிங்"
+        ),
+
+        option(
+            "Meet Friends",
+            "images/friends.jpg",
+            "යහළුවන් හමුවන්න",
+            "நண்பர்களை சந்திப்பது"
+        ),
+
+        option(
+            "Watch Movies",
+            "images/watch-movie.jpg",
+            "චිත්‍රපට බලන්න",
+            "திரைப்படம் பார்ப்பது"
+        ),
+
+        option(
+            "Go to Beach",
+            "images/beach-day.jpg",
+            "මුහුදු වෙරළට යන්න",
+            "கடற்கரைக்கு செல்வது"
+        ),
+
+        option(
+            "Sleep",
+            "images/sleep.jpg",
+            "නිදාගන්න",
+            "தூங்குவது"
+        ),
+
+        option(
+            "Play Games",
+            "images/games.jpg",
+            "ක්‍රීඩා කරන්න",
+            "விளையாடுவது"
+        )
     ]
 },
+
+
+/* Q14 */
 
 {
     id: "q14",
     type: "image",
+
     en: "Which gift would make you happiest?",
+
     si: "ඔබව වැඩිපුරම සතුටු කරන තෑග්ග කුමක්ද?",
+
     ta: "எந்த பரிசு உங்களை அதிகம் மகிழ்விக்கும்?",
+
     pool: [
-        ["Flowers","images/gift-flowers.jpg"],
-        ["Chocolate","images/chocolate.jpg"],
-        ["Perfume","images/perfume.jpg"],
-        ["Clothes","images/clothes.jpg"],
-        ["Jewelry","images/jewelry.jpg"],
-        ["Teddy Bear","images/teddy.jpg"],
-        ["Phone","images/phone.jpg"],
-        ["Watch","images/surprise-date.jpg"]
+
+        option(
+            "Flowers",
+            "images/gift-flowers.jpg",
+            "මල්",
+            "மலர்கள்"
+        ),
+
+        option(
+            "Chocolate",
+            "images/chocolate.jpg",
+            "චොකලට්",
+            "சாக்லேட்"
+        ),
+
+        option(
+            "Perfume",
+            "images/perfume.jpg",
+            "සුවඳ විලවුන්",
+            "வாசனை திரவியம்"
+        ),
+
+        option(
+            "Clothes",
+            "images/clothes.jpg",
+            "ඇඳුම්",
+            "ஆடைகள்"
+        ),
+
+        option(
+            "Jewelry",
+            "images/jewelry.jpg",
+            "ආභරණ",
+            "நகைகள்"
+        ),
+
+        option(
+            "Teddy Bear",
+            "images/teddy.jpg",
+            "ටෙඩි බෙයාර්",
+            "டெடி பியர்"
+        ),
+
+        option(
+            "Phone",
+            "images/phone.jpg",
+            "දුරකථනය",
+            "தொலைபேசி"
+        ),
+
+        option(
+            "Watch",
+            "images/surprise-date.jpg",
+            "අත් ඔරලෝසුව",
+            "கைக்கடிகாரம்"
+        )
     ]
 },
+
+
+/* Q15 */
 
 {
     id: "q15",
     type: "image",
+
     en: "Which trip would you enjoy the most?",
+
     si: "ඔබ වැඩිපුරම කැමති සංචාරය කුමක්ද?",
+
     ta: "எந்த பயணத்தை நீங்கள் அதிகம் விரும்புவீர்கள்?",
+
     pool: [
-        ["Beach Trip","images/trip-beach.jpg"],
-        ["Mountain Trip","images/trip-mountain.jpg"],
-        ["City Trip","images/trip-city.jpg"],
-        ["Nature Trip","images/trip-nature.jpg"],
-        ["Camping","images/camping.jpg"],
-        ["Road Trip","images/roadtrip.jpg"],
-        ["Luxury Hotel","images/luxury-hotel.jpg"],
-        ["Foreign Trip","images/foreign-trip.jpg"]
+
+        option(
+            "Beach Trip",
+            "images/trip-beach.jpg",
+            "මුහුදු වෙරළ සංචාරය",
+            "கடற்கரை பயணம்"
+        ),
+
+        option(
+            "Mountain Trip",
+            "images/trip-mountain.jpg",
+            "කඳුකර සංචාරය",
+            "மலை பயணம்"
+        ),
+
+        option(
+            "City Trip",
+            "images/trip-city.jpg",
+            "නගර සංචාරය",
+            "நகர பயணம்"
+        ),
+
+        option(
+            "Nature Trip",
+            "images/trip-nature.jpg",
+            "ස්වභාවික සංචාරය",
+            "இயற்கை பயணம்"
+        ),
+
+        option(
+            "Camping",
+            "images/camping.jpg",
+            "කඳවුරු බැඳීම",
+            "முகாம்"
+        ),
+
+        option(
+            "Road Trip",
+            "images/roadtrip.jpg",
+            "මාර්ග සංචාරය",
+            "சாலை பயணம்"
+        ),
+
+        option(
+            "Luxury Hotel",
+            "images/luxury-hotel.jpg",
+            "සුඛෝපභෝගී හෝටලය",
+            "ஆடம்பர ஹோட்டல்"
+        ),
+
+        option(
+            "Foreign Trip",
+            "images/foreign-trip.jpg",
+            "විදේශ සංචාරය",
+            "வெளிநாட்டு பயணம்"
+        )
     ]
 },
+
+
+/* Q16 */
 
 {
     id: "q16",
     type: "image",
+
     en: "Which romantic activity do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති ආදරණීය ක්‍රියාකාරකම කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த காதல் செயல் எது?",
+
     pool: [
-        ["Dinner Date","images/dinner-date.jpg"],
-        ["Long Drive","images/long-drive.jpg"],
-        ["Beach Walk","images/beach-walk.jpg"],
-        ["Movie Night","images/movie-night.jpg"],
-        ["Cooking Together","images/cooking.jpg"],
-        ["Travel Together","images/travel-together.jpg"],
-        ["Coffee Date","images/coffee-date.jpg"],
-        ["Sunset Date","images/sunset-date.jpg"]
+
+        option(
+            "Dinner Date",
+            "images/dinner-date.jpg",
+            "රාත්‍රී භෝජන හමුව",
+            "இரவு உணவு சந்திப்பு"
+        ),
+
+        option(
+            "Long Drive",
+            "images/long-drive.jpg",
+            "දිගු රිය ගමන",
+            "நீண்ட வாகன பயணம்"
+        ),
+
+        option(
+            "Beach Walk",
+            "images/beach-walk.jpg",
+            "මුහුදු වෙරළේ ඇවිදීම",
+            "கடற்கரை நடை"
+        ),
+
+        option(
+            "Movie Night",
+            "images/movie-night.jpg",
+            "චිත්‍රපට රාත්‍රිය",
+            "திரைப்பட இரவு"
+        ),
+
+        option(
+            "Cooking Together",
+            "images/cooking.jpg",
+            "එකට ආහාර පිසීම",
+            "ஒன்றாக சமைப்பது"
+        ),
+
+        option(
+            "Travel Together",
+            "images/travel-together.jpg",
+            "එකට සංචාරය කිරීම",
+            "ஒன்றாக பயணம்"
+        ),
+
+        option(
+            "Coffee Date",
+            "images/coffee-date.jpg",
+            "කෝපි හමුව",
+            "காபி சந்திப்பு"
+        ),
+
+        option(
+            "Sunset Date",
+            "images/sunset-date.jpg",
+            "හිරු බැස යන හමුව",
+            "சூரிய அஸ்தமன சந்திப்பு"
+        )
     ]
 },
+
+
+/* Q17 */
 
 {
     id: "q17",
     type: "image",
+
     en: "Which dessert do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති අතුරුපස කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த இனிப்பு எது?",
+
     pool: [
-        ["Ice Cream","images/icecream.jpg"],
-        ["Cake","images/cake.jpg"],
-        ["Chocolate","images/dessert-chocolate.jpg"],
-        ["Donut","images/donut.jpg"],
-        ["Pudding","images/pudding.jpg"],
-        ["Cupcake","images/cupcake.jpg"],
-        ["Fruit Salad","images/fruit-salad.jpg"],
-        ["Waffle","images/waffle.jpg"]
+
+        option(
+            "Ice Cream",
+            "images/icecream.jpg",
+            "අයිස්ක්‍රීම්",
+            "ஐஸ்கிரீம்"
+        ),
+
+        option(
+            "Cake",
+            "images/cake.jpg",
+            "කේක්",
+            "கேக்"
+        ),
+
+        option(
+            "Chocolate",
+            "images/dessert-chocolate.jpg",
+            "චොකලට්",
+            "சாக்லேட்"
+        ),
+
+        option(
+            "Donut",
+            "images/donut.jpg",
+            "ඩෝනට්",
+            "டோனட்"
+        ),
+
+        option(
+            "Pudding",
+            "images/pudding.jpg",
+            "පුඩිං",
+            "புட்டிங்"
+        ),
+
+        option(
+            "Cupcake",
+            "images/cupcake.jpg",
+            "කප්කේක්",
+            "கப்கேக்"
+        ),
+
+        option(
+            "Fruit Salad",
+            "images/fruit-salad.jpg",
+            "පළතුරු සලාද",
+            "பழ சாலட்"
+        ),
+
+        option(
+            "Waffle",
+            "images/waffle.jpg",
+            "වොෆල්",
+            "வாஃபிள்"
+        )
     ]
 },
+
+
+/* Q18 */
 
 {
     id: "q18",
     type: "image",
+
     en: "Which phone brand do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති දුරකථන සන්නාමය කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த தொலைபேசி பிராண்ட் எது?",
+
     pool: [
-        ["iPhone","images/iphone.jpg"],
-        ["Samsung","images/samsung.jpg"],
-        ["Google Pixel","images/google-pixel.jpg"],
-        ["Xiaomi","images/xiaomi.jpg"],
-        ["Vivo","images/vivo.jpg"],
-        ["OPPO","images/oppo.jpg"],
-        ["OnePlus","images/oneplus.jpg"],
-        ["Sony","images/sony.jpg"]
+
+        option(
+            "iPhone",
+            "images/iphone.jpg",
+            "අයිෆෝන්",
+            "ஐபோன்"
+        ),
+
+        option(
+            "Samsung",
+            "images/samsung.jpg",
+            "සැම්සුන්",
+            "சாம்சங்"
+        ),
+
+        option(
+            "Google Pixel",
+            "images/google-pixel.jpg",
+            "ගූගල් පික්සල්",
+            "கூகுள் பிக்சல்"
+        ),
+
+        option(
+            "Xiaomi",
+            "images/xiaomi.jpg",
+            "ෂාවෝමි",
+            "ஷாவ்மி"
+        ),
+
+        option(
+            "Vivo",
+            "images/vivo.jpg",
+            "වීවෝ",
+            "விவோ"
+        ),
+
+        option(
+            "OPPO",
+            "images/oppo.jpg",
+            "ඔප්පෝ",
+            "ஒப்போ"
+        ),
+
+        option(
+            "OnePlus",
+            "images/oneplus.jpg",
+            "වන්ප්ලස්",
+            "ஒன்பிளஸ்"
+        ),
+
+        option(
+            "Sony",
+            "images/sony.jpg",
+            "සෝනි",
+            "சோனி"
+        )
     ]
 },
+
+
+/* Q19 */
 
 {
     id: "q19",
     type: "image",
+
     en: "Which social media app do you like the most?",
+
     si: "ඔබ වැඩිපුරම කැමති සමාජ මාධ්‍ය යෙදුම කුමක්ද?",
+
     ta: "உங்களுக்கு மிகவும் பிடித்த சமூக ஊடக செயலி எது?",
+
     pool: [
-        ["Facebook","images/facebook.jpg"],
-        ["TikTok","images/tiktok.jpg"],
-        ["Instagram","images/instagram.jpg"],
-        ["YouTube","images/youtube.jpg"],
-        ["WhatsApp","images/whatsapp.jpg"],
-        ["Snapchat","images/snapchat.jpg"],
-        ["X","images/x.jpg"],
-        ["Telegram","images/telegram.jpg"]
+
+        option(
+            "Facebook",
+            "images/facebook.jpg",
+            "ෆේස්බුක්",
+            "ஃபேஸ்புக்"
+        ),
+
+        option(
+            "TikTok",
+            "images/tiktok.jpg",
+            "ටික්ටොක්",
+            "டிக்டாக்"
+        ),
+
+        option(
+            "Instagram",
+            "images/instagram.jpg",
+            "ඉන්ස්ටග්‍රෑම්",
+            "இன்ஸ்டாகிராம்"
+        ),
+
+        option(
+            "YouTube",
+            "images/youtube.jpg",
+            "යූටියුබ්",
+            "யூடியூப்"
+        ),
+
+        option(
+            "WhatsApp",
+            "images/whatsapp.jpg",
+            "වට්ස්ඇප්",
+            "வாட்ஸ்அப்"
+        ),
+
+        option(
+            "Snapchat",
+            "images/snapchat.jpg",
+            "ස්නැප්චැට්",
+            "ஸ்னாப்சாட்"
+        ),
+
+        option(
+            "X",
+            "images/x.jpg",
+            "X",
+            "X"
+        ),
+
+        option(
+            "Telegram",
+            "images/telegram.jpg",
+            "ටෙලිග්‍රෑම්",
+            "டெலிகிராம்"
+        )
     ]
 },
+
+
+/* Q20 */
 
 {
     id: "q20",
     type: "image",
+
     en: "Which future dream is closest to your heart?",
+
     si: "ඔබගේ හදවතට වඩාත් සමීප අනාගත සිහිනය කුමක්ද?",
+
     ta: "உங்கள் இதயத்திற்கு நெருக்கமான எதிர்கால கனவு எது?",
+
     pool: [
-        ["Happy Family","images/happy-family.jpg"],
-        ["Travel World","images/world-travel.jpg"],
-        ["Dream Home","images/dream-home.jpg"],
-        ["Successful Career","images/career.jpg"],
-        ["Own Business","images/business.jpg"],
-        ["Peaceful Life","images/peaceful-life.jpg"],
-        ["Luxury Life","images/luxury-life.jpg"],
-        ["Adventure Life","images/adventure-life.jpg"]
+
+        option(
+            "Happy Family",
+            "images/happy-family.jpg",
+            "සතුටු පවුලක්",
+            "மகிழ்ச்சியான குடும்பம்"
+        ),
+
+        option(
+            "Travel World",
+            "images/world-travel.jpg",
+            "ලෝකය පුරා සංචාරය",
+            "உலகம் சுற்றிப் பயணம்"
+        ),
+
+        option(
+            "Dream Home",
+            "images/dream-home.jpg",
+            "සිහින නිවස",
+            "கனவு வீடு"
+        ),
+
+        option(
+            "Successful Career",
+            "images/career.jpg",
+            "සාර්ථක වෘත්තිය",
+            "வெற்றிகரமான தொழில்"
+        ),
+
+        option(
+            "Own Business",
+            "images/business.jpg",
+            "තමන්ගේම ව්‍යාපාරයක්",
+            "சொந்த தொழில்"
+        ),
+
+        option(
+            "Peaceful Life",
+            "images/peaceful-life.jpg",
+            "සාමකාමී ජීවිතයක්",
+            "அமைதியான வாழ்க்கை"
+        ),
+
+        option(
+            "Luxury Life",
+            "images/luxury-life.jpg",
+            "සුඛෝපභෝගී ජීවිතයක්",
+            "ஆடம்பர வாழ்க்கை"
+        ),
+
+        option(
+            "Adventure Life",
+            "images/adventure-life.jpg",
+            "ත්‍රාසජනක ජීවිතයක්",
+            "சாகச வாழ்க்கை"
+        )
     ]
 }
 
 ];
 
+
+/* =====================================================
+   ANSWERS
+===================================================== */
+
 let currentQuestion = 0;
-let answers = JSON.parse(
-    localStorage.getItem(
-        "page4Answers_" + coupleId + "_" + partnerId
-    ) || "{}"
-);
 
-/*
-Create one random set of 4 image answers
-for this couple.
+let isSaving = false;
 
-Once created, it stays the same after refresh.
-*/
+const answerStorageKey =
+    "page4Answers_" +
+    coupleId +
+    "_" +
+    partnerId;
 
-const optionStorageKey = "page4OptionSets_" + coupleId;
 
-let savedOptionSets =
-    JSON.parse(localStorage.getItem(optionStorageKey) || "{}");
+let answers = {};
 
-/*
-Reset only the option sets for questions that were changed.
-This prevents old saved Q18/Q19 choices from overriding the new pools.
-After the new sets are generated once, remove these two reset lines
-if you want the same random four choices to remain fixed on every refresh.
-*/
-delete savedOptionSets["q18"];
-delete savedOptionSets["q19"];
-localStorage.setItem(optionStorageKey, JSON.stringify(savedOptionSets));
+try {
+
+    answers =
+        JSON.parse(
+            localStorage.getItem(
+                answerStorageKey
+            ) || "{}"
+        );
+
+} catch (error) {
+
+    answers = {};
+}
+
+
+/* =====================================================
+   RANDOM OPTION SETS
+
+   One set is stored per Couple + Partner.
+   Refreshing the page does not change the four options.
+===================================================== */
+
+const optionStorageKey =
+    "page4OptionSets_" +
+    coupleId +
+    "_" +
+    partnerId;
+
+
+let savedOptionSets = {};
+
+try {
+
+    savedOptionSets =
+        JSON.parse(
+            localStorage.getItem(
+                optionStorageKey
+            ) || "{}"
+        );
+
+} catch (error) {
+
+    savedOptionSets = {};
+}
+
 
 function shuffleArray(array) {
 
     const copy = [...array];
 
-    for (let i = copy.length - 1; i > 0; i--) {
+    for (
+        let i = copy.length - 1;
+        i > 0;
+        i--
+    ) {
 
-        const j = Math.floor(Math.random() * (i + 1));
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
 
-        [copy[i], copy[j]] = [copy[j], copy[i]];
+        [
+            copy[i],
+            copy[j]
+        ] = [
+            copy[j],
+            copy[i]
+        ];
     }
 
     return copy;
 }
 
-function getOptions(question) {
 
-    if (savedOptionSets[question.id]) {
-        return savedOptionSets[question.id];
+function normalizeSavedOption(
+    savedItem,
+    question
+) {
+
+    /*
+    Supports the old Page 4 localStorage format too:
+    ["Mango", "images/mango.jpg"]
+    */
+
+    if (Array.isArray(savedItem)) {
+
+        const value =
+            savedItem[0];
+
+        return question.pool.find(
+            item =>
+                item.value === value
+        ) || null;
     }
 
-    const randomOptions =
-        shuffleArray(question.pool).slice(0, 4);
 
-    savedOptionSets[question.id] = randomOptions;
+    if (
+        savedItem &&
+        typeof savedItem === "object" &&
+        savedItem.value
+    ) {
+
+        return question.pool.find(
+            item =>
+                item.value === savedItem.value
+        ) || null;
+    }
+
+
+    return null;
+}
+
+
+function getOptions(question) {
+
+    const saved =
+        savedOptionSets[
+            question.id
+        ];
+
+
+    if (
+        Array.isArray(saved) &&
+        saved.length === 4
+    ) {
+
+        const normalized =
+            saved
+                .map(item =>
+                    normalizeSavedOption(
+                        item,
+                        question
+                    )
+                )
+                .filter(Boolean);
+
+
+        if (normalized.length === 4) {
+
+            return normalized;
+        }
+    }
+
+
+    const randomOptions =
+        shuffleArray(
+            question.pool
+        ).slice(0, 4);
+
+
+    /*
+    Save only common values.
+    This avoids language-dependent data.
+    */
+
+    savedOptionSets[
+        question.id
+    ] =
+        randomOptions.map(
+            item => item.value
+        );
+
 
     localStorage.setItem(
         optionStorageKey,
-        JSON.stringify(savedOptionSets)
+        JSON.stringify(
+            savedOptionSets
+        )
     );
+
 
     return randomOptions;
 }
+
+
+/* =====================================================
+   QUESTION LANGUAGE
+===================================================== */
 
 function getQuestionText(question) {
 
@@ -740,186 +1946,686 @@ function getQuestionText(question) {
     return question.en;
 }
 
-function renderQuestion() {
 
-    const question = questions[currentQuestion];
+/* =====================================================
+   UI TRANSLATIONS
+===================================================== */
 
-    document.getElementById("questionNumber").textContent =
-        "QUESTION " +
-        String(currentQuestion + 1).padStart(2, "0");
+function setStaticTranslations() {
 
-    document.getElementById("progressText").textContent =
-        "Question " +
-        (currentQuestion + 1) +
-        " of 20";
+    const backBtn =
+        document.getElementById(
+            "backBtn"
+        );
 
-    document.getElementById("progressFill").style.width =
-        ((currentQuestion + 1) / 20 * 100) + "%";
+    const noteText =
+        document.getElementById(
+            "noteText"
+        );
 
-    document.getElementById("questionText").textContent =
-        getQuestionText(question);
 
-    const answerArea =
-        document.getElementById("answerArea");
+    backBtn.textContent =
+        textByLanguage(
+            "← Previous",
+            "← පෙර ප්‍රශ්නය",
+            "← முந்தைய கேள்வி"
+        );
 
-    answerArea.innerHTML = "";
 
-    if (question.type === "text") {
-
-        const input =
-            document.createElement("input");
-
-        input.type = question.id === "q2" ? "date" : "text";
-        input.className = "answer-input";
-
-        input.placeholder =
-            language === "සිංහල"
-                ? "ඔබගේ පිළිතුර මෙහි ලියන්න..."
-                : language === "தமிழ்"
-                ? "உங்கள் பதிலை இங்கே எழுதுங்கள்..."
-                : "Type your answer here...";
-
-        input.value =
-            answers[question.id] || "";
-
-        input.addEventListener("input", function () {
-
-            answers[question.id] =
-                this.value.trim();
-
-            saveDraft();
-            updateNextButton();
-        });
-
-        answerArea.appendChild(input);
-
-    } else {
-
-        const optionsContainer =
-            document.createElement("div");
-
-        optionsContainer.className =
-            "image-options";
-
-        const options =
-            getOptions(question);
-
-        options.forEach(option => {
-
-            const name = option[0];
-            const image = option[1];
-
-            const card =
-                document.createElement("div");
-
-            card.className = "image-option";
-
-            if (answers[question.id] === name) {
-                card.classList.add("selected");
-            }
-
-            card.innerHTML = `
-                <div class="tick">✓</div>
-
-                <img
-                    src="${image}"
-                    alt="${name}"
-                    onerror="
-                        this.style.display='none';
-                        this.parentElement.style.minHeight='100px';
-                    "
-                >
-
-                <div class="option-name">
-                    ${name}
-                </div>
-            `;
-
-            card.addEventListener(
-                "click",
-                function () {
-
-                    answers[question.id] = name;
-
-                    saveDraft();
-
-                    document
-                        .querySelectorAll(".image-option")
-                        .forEach(item =>
-                            item.classList.remove("selected")
-                        );
-
-                    card.classList.add("selected");
-
-                    updateNextButton();
-                }
-            );
-
-            optionsContainer.appendChild(card);
-        });
-
-        answerArea.appendChild(optionsContainer);
-    }
-
-    document.getElementById("backBtn").disabled =
-        currentQuestion === 0;
-
-    const nextBtn =
-        document.getElementById("nextBtn");
-
-    if (currentQuestion === 19) {
-
-        nextBtn.textContent =
-            language === "සිංහල"
-                ? "පිළිතුරු සුරකින්න ❤️"
-                : language === "தமிழ்"
-                ? "பதில்களை சேமிக்கவும் ❤️"
-                : "Save Answers ❤️";
-
-    } else {
-
-        nextBtn.textContent =
-            language === "සිංහල"
-                ? "ඊළඟ ප්‍රශ්නය ❤️"
-                : language === "தமிழ்"
-                ? "அடுத்த கேள்வி ❤️"
-                : "Next ❤️";
-    }
-
-    updateNextButton();
+    noteText.textContent =
+        textByLanguage(
+            "Your answers will be used for your Miracle Quiz ❤️",
+            "ඔබගේ පිළිතුරු Miracle Quiz සඳහා භාවිතා වේ ❤️",
+            "உங்கள் பதில்கள் Miracle Quiz-க்கு பயன்படுத்தப்படும் ❤️"
+        );
 }
 
-function updateNextButton() {
+
+/* =====================================================
+   RENDER QUESTION
+===================================================== */
+
+function renderQuestion() {
 
     const question =
         questions[currentQuestion];
 
-    const value =
-        answers[question.id];
 
-    document.getElementById("nextBtn").disabled =
-        !value || String(value).trim() === "";
+    document.getElementById(
+        "questionNumber"
+    ).textContent =
+        textByLanguage(
+            "QUESTION ",
+            "ප්‍රශ්නය ",
+            "கேள்வி "
+        ) +
+        String(
+            currentQuestion + 1
+        ).padStart(2, "0");
+
+
+    document.getElementById(
+        "progressText"
+    ).textContent =
+        textByLanguage(
+            "Question " +
+                (currentQuestion + 1) +
+                " of 20",
+
+            "ප්‍රශ්නය " +
+                (currentQuestion + 1) +
+                " / 20",
+
+            "கேள்வி " +
+                (currentQuestion + 1) +
+                " / 20"
+        );
+
+
+    document.getElementById(
+        "progressFill"
+    ).style.width =
+        (
+            (
+                currentQuestion + 1
+            ) / 20 * 100
+        ) + "%";
+
+
+    document.getElementById(
+        "questionText"
+    ).textContent =
+        getQuestionText(
+            question
+        );
+
+
+    const answerArea =
+        document.getElementById(
+            "answerArea"
+        );
+
+
+    answerArea.innerHTML = "";
+
+
+    /* TEXT QUESTIONS */
+
+    if (
+        question.type === "text"
+    ) {
+
+        const input =
+            document.createElement(
+                "input"
+            );
+
+
+        input.type =
+            question.id === "q2"
+                ? "date"
+                : "text";
+
+
+        input.className =
+            "answer-input";
+
+
+        if (
+            question.id !== "q2"
+        ) {
+
+            input.placeholder =
+                textByLanguage(
+                    "Type your answer here...",
+                    "ඔබගේ පිළිතුර මෙහි ලියන්න...",
+                    "உங்கள் பதிலை இங்கே எழுதுங்கள்..."
+                );
+        }
+
+
+        input.value =
+            answers[
+                question.id
+            ] || "";
+
+
+        input.addEventListener(
+            "input",
+            function () {
+
+                answers[
+                    question.id
+                ] =
+                    this.value.trim();
+
+                saveDraft();
+
+                updateNextButton();
+            }
+        );
+
+
+        answerArea.appendChild(
+            input
+        );
+    }
+
+
+    /* IMAGE QUESTIONS */
+
+    else {
+
+        const optionsContainer =
+            document.createElement(
+                "div"
+            );
+
+
+        optionsContainer.className =
+            "image-options";
+
+
+        const options =
+            getOptions(question);
+
+
+        options.forEach(
+            item => {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                card.className =
+                    "image-option";
+
+
+                if (
+                    answers[
+                        question.id
+                    ] === item.value
+                ) {
+
+                    card.classList.add(
+                        "selected"
+                    );
+                }
+
+
+                const tick =
+                    document.createElement(
+                        "div"
+                    );
+
+                tick.className =
+                    "tick";
+
+                tick.textContent =
+                    "✓";
+
+
+                const img =
+                    document.createElement(
+                        "img"
+                    );
+
+                img.src =
+                    item.image;
+
+                img.alt =
+                    getOptionLabel(
+                        item
+                    );
+
+
+                img.addEventListener(
+                    "error",
+                    function () {
+
+                        this.style.display =
+                            "none";
+
+                        card.style.minHeight =
+                            "100px";
+                    }
+                );
+
+
+                const optionName =
+                    document.createElement(
+                        "div"
+                    );
+
+                optionName.className =
+                    "option-name";
+
+                optionName.textContent =
+                    getOptionLabel(
+                        item
+                    );
+
+
+                card.appendChild(
+                    tick
+                );
+
+                card.appendChild(
+                    img
+                );
+
+                card.appendChild(
+                    optionName
+                );
+
+
+                card.addEventListener(
+                    "click",
+                    function () {
+
+                        /*
+                        IMPORTANT:
+                        Save the common English value,
+                        not the translated label.
+                        */
+
+                        answers[
+                            question.id
+                        ] =
+                            item.value;
+
+
+                        saveDraft();
+
+
+                        optionsContainer
+                            .querySelectorAll(
+                                ".image-option"
+                            )
+                            .forEach(
+                                optionCard =>
+                                    optionCard
+                                        .classList
+                                        .remove(
+                                            "selected"
+                                        )
+                            );
+
+
+                        card.classList.add(
+                            "selected"
+                        );
+
+
+                        updateNextButton();
+                    }
+                );
+
+
+                optionsContainer
+                    .appendChild(
+                        card
+                    );
+            }
+        );
+
+
+        answerArea.appendChild(
+            optionsContainer
+        );
+    }
+
+
+    /* BACK BUTTON */
+
+    document.getElementById(
+        "backBtn"
+    ).disabled =
+        currentQuestion === 0 ||
+        isSaving;
+
+
+    /* NEXT / SAVE BUTTON */
+
+    const nextBtn =
+        document.getElementById(
+            "nextBtn"
+        );
+
+
+    if (
+        currentQuestion === 19
+    ) {
+
+        nextBtn.textContent =
+            textByLanguage(
+                "Save Answers ❤️",
+                "පිළිතුරු සුරකින්න ❤️",
+                "பதில்களை சேமிக்கவும் ❤️"
+            );
+
+    } else {
+
+        nextBtn.textContent =
+            textByLanguage(
+                "Next ❤️",
+                "ඊළඟ ප්‍රශ්නය ❤️",
+                "அடுத்த கேள்வி ❤️"
+            );
+    }
+
+
+    updateNextButton();
 }
+
+
+/* =====================================================
+   NEXT BUTTON VALIDATION
+===================================================== */
+
+function updateNextButton() {
+
+    const question =
+        questions[
+            currentQuestion
+        ];
+
+
+    const value =
+        answers[
+            question.id
+        ];
+
+
+    document.getElementById(
+        "nextBtn"
+    ).disabled =
+        isSaving ||
+        !value ||
+        String(value).trim() === "";
+}
+
+
+/* =====================================================
+   SAVE LOCAL DRAFT
+===================================================== */
 
 function saveDraft() {
 
     localStorage.setItem(
-        "page4Answers_" + coupleId + "_" + partnerId,
-        JSON.stringify(answers)
+        answerStorageKey,
+        JSON.stringify(
+            answers
+        )
     );
 }
 
+
+/* =====================================================
+   CHECK ALL 20 ANSWERS
+===================================================== */
+
+function allQuestionsAnswered() {
+
+    for (
+        let i = 1;
+        i <= 20;
+        i++
+    ) {
+
+        const questionId =
+            "q" + i;
+
+
+        if (
+            answers[
+                questionId
+            ] === undefined ||
+            answers[
+                questionId
+            ] === null ||
+            String(
+                answers[
+                    questionId
+                ]
+            ).trim() === ""
+        ) {
+
+            return false;
+        }
+    }
+
+
+    return true;
+}
+
+
+/* =====================================================
+   SAVE PAGE 4 TO SERVER / SUPABASE
+===================================================== */
+
+async function savePage4ToServer() {
+
+    if (isSaving) {
+        return;
+    }
+
+
+    if (
+        !allQuestionsAnswered()
+    ) {
+
+        alert(
+            textByLanguage(
+                "Please answer all 20 questions.",
+                "කරුණාකර ප්‍රශ්න 20ටම පිළිතුරු දෙන්න.",
+                "தயவுசெய்து 20 கேள்விகளுக்கும் பதிலளிக்கவும்."
+            )
+        );
+
+        return;
+    }
+
+
+    isSaving = true;
+
+
+    const nextBtn =
+        document.getElementById(
+            "nextBtn"
+        );
+
+    const backBtn =
+        document.getElementById(
+            "backBtn"
+        );
+
+    const saveStatus =
+        document.getElementById(
+            "saveStatus"
+        );
+
+
+    nextBtn.disabled =
+        true;
+
+    backBtn.disabled =
+        true;
+
+
+    nextBtn.textContent =
+        textByLanguage(
+            "Saving...",
+            "සුරකිමින්...",
+            "சேமிக்கப்படுகிறது..."
+        );
+
+
+    saveStatus.textContent =
+        textByLanguage(
+            "Saving your answers securely...",
+            "ඔබගේ පිළිතුරු සුරකිමින් පවතී...",
+            "உங்கள் பதில்கள் சேமிக்கப்படுகின்றன..."
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/couples/" +
+                encodeURIComponent(
+                    coupleId
+                ) +
+                "/page4",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            partnerId:
+                                Number(
+                                    partnerId
+                                ),
+
+                            answers:
+                                answers
+                        })
+                }
+            );
+
+
+        let data = {};
+
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch (error) {
+
+            data = {};
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Could not save Page 4 answers."
+            );
+        }
+
+
+        /*
+        Server confirmed that the answers
+        were saved successfully.
+        */
+
+
+        localStorage.setItem(
+            "page4Completed_" +
+                coupleId +
+                "_" +
+                partnerId,
+            "true"
+        );
+
+
+        saveStatus.textContent =
+            textByLanguage(
+                "Your answers have been saved ❤️",
+                "ඔබගේ පිළිතුරු සාර්ථකව සුරැකුණා ❤️",
+                "உங்கள் பதில்கள் வெற்றிகரமாக சேமிக்கப்பட்டன ❤️"
+            );
+
+
+        alert(
+            textByLanguage(
+                "Your answers have been saved ❤️",
+                "ඔබගේ පිළිතුරු සාර්ථකව සුරැකුණා ❤️",
+                "உங்கள் பதில்கள் வெற்றிகரமாக சேமிக்கப்பட்டன ❤️"
+            )
+        );
+
+
+        /*
+        Go to Page 5 only after
+        the server confirms success.
+        */
+
+        window.location.href =
+            "page5.html";
+
+
+    } catch (error) {
+
+        console.error(
+            "Page 4 save error:",
+            error
+        );
+
+
+        isSaving = false;
+
+
+        saveStatus.textContent =
+            textByLanguage(
+                "Could not save your answers. Please try again.",
+                "පිළිතුරු සුරැකීමට නොහැකි වුණා. නැවත උත්සාහ කරන්න.",
+                "பதில்களை சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
+            );
+
+
+        alert(
+            textByLanguage(
+                "Could not save your answers. Please try again.",
+                "පිළිතුරු සුරැකීමට නොහැකි වුණා. නැවත උත්සාහ කරන්න.",
+                "பதில்களை சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
+            )
+        );
+
+
+        renderQuestion();
+    }
+}
+
+
+/* =====================================================
+   PREVIOUS BUTTON
+===================================================== */
+
 document
-    .getElementById("backBtn")
+    .getElementById(
+        "backBtn"
+    )
     .addEventListener(
         "click",
         function () {
 
-            if (currentQuestion > 0) {
+            if (
+                isSaving
+            ) {
+                return;
+            }
+
+
+            if (
+                currentQuestion > 0
+            ) {
 
                 currentQuestion--;
 
                 renderQuestion();
+
 
                 window.scrollTo({
                     top: 0,
@@ -929,26 +2635,58 @@ document
         }
     );
 
+
+/* =====================================================
+   NEXT / SAVE BUTTON
+===================================================== */
+
 document
-    .getElementById("nextBtn")
+    .getElementById(
+        "nextBtn"
+    )
     .addEventListener(
         "click",
-        function () {
+        async function () {
 
-            const question =
-                questions[currentQuestion];
-
-            if (!answers[question.id]) {
+            if (
+                isSaving
+            ) {
                 return;
             }
 
+
+            const question =
+                questions[
+                    currentQuestion
+                ];
+
+
+            const value =
+                answers[
+                    question.id
+                ];
+
+
+            if (
+                !value ||
+                String(value).trim() === ""
+            ) {
+
+                return;
+            }
+
+
             saveDraft();
 
-            if (currentQuestion < 19) {
+
+            if (
+                currentQuestion < 19
+            ) {
 
                 currentQuestion++;
 
                 renderQuestion();
+
 
                 window.scrollTo({
                     top: 0,
@@ -957,31 +2695,17 @@ document
 
             } else {
 
-                localStorage.setItem(
-                    "page4Completed_" +
-                    coupleId +
-                    "_" +
-                    partnerId,
-                    "true"
-                );
-
-                alert(
-                    language === "සිංහල"
-                        ? "ඔබගේ පිළිතුරු සුරැකුණා ❤️"
-                        : language === "தமிழ்"
-                        ? "உங்கள் பதில்கள் சேமிக்கப்பட்டன ❤️"
-                        : "Your answers have been saved ❤️"
-                );
-
-                /*
-                Page 5 will be created next.
-                */
-
-                window.location.href =
-                    "page5.html";
+                await savePage4ToServer();
             }
         }
     );
+
+
+/* =====================================================
+   START PAGE
+===================================================== */
+
+setStaticTranslations();
 
 renderQuestion();
 
