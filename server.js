@@ -73,7 +73,6 @@ app.post("/api/couples/create", async (req, res) => {
 
     const cleanUsername = username.trim();
 
-    // Check username
     const usernameCheck = await fetch(
       `${SUPABASE_URL}/rest/v1/couples?username=eq.${encodeFilter(
         cleanUsername
@@ -105,7 +104,6 @@ app.post("/api/couples/create", async (req, res) => {
     let coupleCode;
     let codeExists = true;
 
-    // Generate unique couple code
     while (codeExists) {
       coupleCode = crypto
         .randomBytes(4)
@@ -136,7 +134,6 @@ app.post("/api/couples/create", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Save couple
     const coupleResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/couples`,
       {
@@ -165,7 +162,6 @@ app.post("/api/couples/create", async (req, res) => {
       });
     }
 
-    // Create Partner 1
     const partnerResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/partners`,
       {
@@ -196,7 +192,6 @@ app.post("/api/couples/create", async (req, res) => {
       const errorText = await readSupabaseError(partnerResponse);
       console.error("Create Partner 1 error:", errorText);
 
-      // Roll back couple if partner creation fails
       await fetch(
         `${SUPABASE_URL}/rest/v1/couples?id=eq.${encodeFilter(
           coupleId
@@ -286,7 +281,6 @@ app.post("/api/couples/join", async (req, res) => {
       });
     }
 
-    // Check if Partner 2 already exists
     const existingPartnerResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/partners?couple_id=eq.${encodeFilter(
         couple.id
@@ -301,17 +295,15 @@ app.post("/api/couples/join", async (req, res) => {
         existingPartnerResponse
       );
 
-      console.error(
-        "Partner 2 lookup error:",
-        errorText
-      );
+      console.error("Partner 2 lookup error:", errorText);
 
       return res.status(500).json({
         message: "Could not check Partner 2."
       });
     }
 
-    const existingPartner = await existingPartnerResponse.json();
+    const existingPartner =
+      await existingPartnerResponse.json();
 
     if (existingPartner.length === 0) {
       const partnerResponse = await fetch(
@@ -697,7 +689,10 @@ app.get(
         });
       }
 
-      const { coupleId, partnerId } = req.params;
+      const {
+        coupleId,
+        partnerId
+      } = req.params;
 
       const id = Number(partnerId);
 
@@ -747,6 +742,117 @@ app.get(
       });
     } catch (error) {
       console.error("Get profile error:", error);
+
+      res.status(500).json({
+        message: "Server error."
+      });
+    }
+  }
+);
+
+// ======================================================
+// SAVE PAGE 4 ACTUAL ANSWERS
+// ======================================================
+
+app.post(
+  "/api/couples/:coupleId/page4",
+  async (req, res) => {
+    try {
+      if (!checkSupabaseConfig()) {
+        return res.status(500).json({
+          message: "Supabase configuration is missing."
+        });
+      }
+
+      const { coupleId } = req.params;
+
+      const {
+        partnerId,
+        answers
+      } = req.body;
+
+      const id = Number(partnerId);
+
+      if (id !== 1 && id !== 2) {
+        return res.status(400).json({
+          message: "Invalid Partner ID."
+        });
+      }
+
+      if (
+        !answers ||
+        typeof answers !== "object" ||
+        Array.isArray(answers)
+      ) {
+        return res.status(400).json({
+          message: "Invalid answers."
+        });
+      }
+
+      // Make sure all 20 questions are answered
+      for (let i = 1; i <= 20; i++) {
+        const questionId = `q${i}`;
+
+        if (
+          answers[questionId] === undefined ||
+          answers[questionId] === null ||
+          String(answers[questionId]).trim() === ""
+        ) {
+          return res.status(400).json({
+            message: `Answer for ${questionId} is required.`
+          });
+        }
+      }
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/partners?couple_id=eq.${encodeFilter(
+          coupleId
+        )}&partner_number=eq.${id}`,
+        {
+          method: "PATCH",
+          headers: supabaseHeaders({
+            Prefer: "return=representation"
+          }),
+          body: JSON.stringify({
+            actual_answers: answers,
+            page4_completed: true,
+            updated_at: new Date().toISOString()
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await readSupabaseError(response);
+
+        console.error(
+          "Save Page 4 answers error:",
+          errorText
+        );
+
+        return res.status(500).json({
+          message: "Could not save Page 4 answers."
+        });
+      }
+
+      const rows = await response.json();
+
+      if (rows.length === 0) {
+        return res.status(404).json({
+          message: "Partner not found."
+        });
+      }
+
+      res.json({
+        message: "Your answers have been saved ❤️",
+        coupleId,
+        partnerId: id,
+        page4Completed: true
+      });
+    } catch (error) {
+      console.error(
+        "Save Page 4 answers error:",
+        error
+      );
 
       res.status(500).json({
         message: "Server error."
