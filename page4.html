@@ -1770,78 +1770,45 @@ try {
 
 
 /* =====================================================
-   RANDOM OPTION SETS
-
-   One set is stored per Couple + Partner.
-   Refreshing the page does not change the four options.
+   SHARED RANDOM OPTION SETS
 ===================================================== */
 
 const optionStorageKey =
     "page4OptionSets_" +
     coupleId +
-    "_" +
-    partnerId;
-
+    "_shared";
 
 let savedOptionSets = {};
 
-try {
-
-    savedOptionSets =
-        JSON.parse(
-            localStorage.getItem(
-                optionStorageKey
-            ) || "{}"
-        );
-
-} catch (error) {
-
-    savedOptionSets = {};
-}
-
-
 function shuffleArray(array) {
-
     const copy = [...array];
 
-    for (
-        let i = copy.length - 1;
-        i > 0;
-        i--
-    ) {
-
+    for (let i = copy.length - 1; i > 0; i--) {
         const j =
             Math.floor(
                 Math.random() * (i + 1)
             );
 
-        [
-            copy[i],
-            copy[j]
-        ] = [
-            copy[j],
-            copy[i]
-        ];
+        [copy[i], copy[j]] =
+            [copy[j], copy[i]];
     }
 
     return copy;
 }
 
-
 function normalizeSavedOption(
     savedItem,
     question
 ) {
-
-    /*
-    Supports the old Page 4 localStorage format too:
-    ["Mango", "images/mango.jpg"]
-    */
+    if (typeof savedItem === "string") {
+        return question.pool.find(
+            item =>
+                item.value === savedItem
+        ) || null;
+    }
 
     if (Array.isArray(savedItem)) {
-
-        const value =
-            savedItem[0];
+        const value = savedItem[0];
 
         return question.pool.find(
             item =>
@@ -1849,37 +1816,30 @@ function normalizeSavedOption(
         ) || null;
     }
 
-
     if (
         savedItem &&
         typeof savedItem === "object" &&
         savedItem.value
     ) {
-
         return question.pool.find(
             item =>
                 item.value === savedItem.value
         ) || null;
     }
 
-
     return null;
 }
 
-
 function getOptions(question) {
-
     const saved =
         savedOptionSets[
             question.id
         ];
 
-
     if (
         Array.isArray(saved) &&
         saved.length === 4
     ) {
-
         const normalized =
             saved
                 .map(item =>
@@ -1890,24 +1850,15 @@ function getOptions(question) {
                 )
                 .filter(Boolean);
 
-
         if (normalized.length === 4) {
-
             return normalized;
         }
     }
-
 
     const randomOptions =
         shuffleArray(
             question.pool
         ).slice(0, 4);
-
-
-    /*
-    Save only common values.
-    This avoids language-dependent data.
-    */
 
     savedOptionSets[
         question.id
@@ -1916,7 +1867,6 @@ function getOptions(question) {
             item => item.value
         );
 
-
     localStorage.setItem(
         optionStorageKey,
         JSON.stringify(
@@ -1924,8 +1874,66 @@ function getOptions(question) {
         )
     );
 
-
     return randomOptions;
+}
+
+async function loadSharedOptionSets() {
+    try {
+        const response = await fetch(
+            `/api/couples/${encodeURIComponent(
+                coupleId
+            )}/page4-options`
+        );
+
+        if (response.ok) {
+            const data =
+                await response.json();
+
+            if (
+                data.optionSets &&
+                typeof data.optionSets === "object" &&
+                Object.keys(
+                    data.optionSets
+                ).length > 0
+            ) {
+                savedOptionSets =
+                    data.optionSets;
+
+                localStorage.setItem(
+                    optionStorageKey,
+                    JSON.stringify(
+                        savedOptionSets
+                    )
+                );
+
+                return;
+            }
+        }
+
+        savedOptionSets =
+            JSON.parse(
+                localStorage.getItem(
+                    optionStorageKey
+                ) || "{}"
+            );
+
+    } catch (error) {
+        console.error(
+            "Could not load shared option sets:",
+            error
+        );
+
+        try {
+            savedOptionSets =
+                JSON.parse(
+                    localStorage.getItem(
+                        optionStorageKey
+                    ) || "{}"
+                );
+        } catch {
+            savedOptionSets = {};
+        }
+    }
 }
 
 
@@ -2713,9 +2721,16 @@ document
    START PAGE
 ===================================================== */
 
-setStaticTranslations();
+async function startPage() {
 
-renderQuestion();
+    setStaticTranslations();
+
+    await loadSharedOptionSets();
+
+    renderQuestion();
+}
+
+startPage();
 
 </script>
 
