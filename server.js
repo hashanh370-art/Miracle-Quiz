@@ -880,13 +880,21 @@ app.post(
       const currentOptionSets =
         coupleRows[0].option_sets || {};
 
-      const updatedOptionSets = {
-        ...currentOptionSets,
-        [`partner${id}`]:
-          optionSets && typeof optionSets === "object"
-            ? optionSets
-            : {}
-      };
+      let updatedOptionSets = currentOptionSets;
+
+if (
+  !currentOptionSets.shared ||
+  typeof currentOptionSets.shared !== "object" ||
+  Object.keys(currentOptionSets.shared).length === 0
+) {
+  updatedOptionSets = {
+    ...currentOptionSets,
+    shared:
+      optionSets && typeof optionSets === "object"
+        ? optionSets
+        : {}
+  };
+}
 
       const coupleUpdateResponse = await fetch(
         `${SUPABASE_URL}/rest/v1/couples?id=eq.${encodeFilter(
@@ -1087,9 +1095,7 @@ app.get(
         coupleRows[0].option_sets || {};
 
       const partnerOptionSets =
-        allOptionSets[
-          `partner${otherPartnerId}`
-        ] || {};
+    allOptionSets.shared || {};
 
       // Question order
       let questionOrder =
