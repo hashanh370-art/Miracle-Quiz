@@ -477,7 +477,13 @@ if (!coupleId || !partnerId) {
 const orderKey = "page5QuestionOrder_" + coupleId + "_" + partnerId;
 const guessKey = "page5Guesses_" + coupleId + "_" + partnerId;
 const completedKey = "page5Completed_" + coupleId + "_" + partnerId;
-const optionStorageKey = "page4OptionSets_" + coupleId;
+/*
+Page 5 must show the exact four options that the OTHER partner
+saw on Page 4. Image names/paths below are not changed.
+*/
+const otherPartnerId = String(partnerId) === "1" ? "2" : "1";
+const optionStorageKey =
+    "page4OptionSets_" + coupleId + "_" + otherPartnerId;
 
 let guesses = JSON.parse(localStorage.getItem(guessKey) || "{}");
 let savedOptionSets = JSON.parse(localStorage.getItem(optionStorageKey) || "{}");
@@ -573,14 +579,31 @@ function getOptionLabel(name) {
 }
 
 function getOptions(question) {
-    if (savedOptionSets[question.id] && savedOptionSets[question.id].length) {
-        return savedOptionSets[question.id];
+    const saved = savedOptionSets[question.id];
+
+    if (Array.isArray(saved) && saved.length === 4) {
+        const normalized = saved
+            .map(item => {
+                const value = Array.isArray(item)
+                    ? item[0]
+                    : (item && typeof item === "object" ? item.value : item);
+
+                return question.pool.find(
+                    poolItem => poolItem[0] === value
+                ) || null;
+            })
+            .filter(Boolean);
+
+        if (normalized.length === 4) {
+            return normalized;
+        }
     }
 
-    const randomOptions = shuffleArray(question.pool).slice(0, 4);
-    savedOptionSets[question.id] = randomOptions;
-    localStorage.setItem(optionStorageKey, JSON.stringify(savedOptionSets));
-    return randomOptions;
+    /*
+    Compatibility fallback only.
+    It keeps the existing Page 5 image names/paths unchanged.
+    */
+    return shuffleArray(question.pool).slice(0, 4);
 }
 
 function setupIntro() {
