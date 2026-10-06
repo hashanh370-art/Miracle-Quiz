@@ -2496,7 +2496,15 @@ async function savePage4ToServer() {
                                 ),
 
                             answers:
-                                answers
+                                answers,
+
+                            /*
+                            Save the exact 4 options shown to this partner.
+                            Page 5 will use the OTHER partner's saved option set,
+                            matched by question_id.
+                            */
+                            optionSets:
+                                savedOptionSets
                         })
                 }
             );
