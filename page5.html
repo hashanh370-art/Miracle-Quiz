@@ -474,51 +474,16 @@ if (!coupleId || !partnerId) {
     window.location.href = "/";
 }
 
-const orderKey = "page5QuestionOrder_" + coupleId + "_" + partnerId;
 const guessKey = "page5Guesses_" + coupleId + "_" + partnerId;
 const completedKey = "page5Completed_" + coupleId + "_" + partnerId;
-/*
-Page 5 must show the exact four options that the OTHER partner
-saw on Page 4. Image names/paths below are not changed.
-*/
-const otherPartnerId = String(partnerId) === "1" ? "2" : "1";
-const optionStorageKey =
-    "page4OptionSets_" + coupleId + "_" + otherPartnerId;
 
-let guesses = JSON.parse(localStorage.getItem(guessKey) || "{}");
-let savedOptionSets = JSON.parse(localStorage.getItem(optionStorageKey) || "{}");
+let guesses = {};
+let savedOptionSets = {};
+let questionOrder = [];
+let orderedQuestions = [];
 let currentQuestion = 0;
-
-function shuffleArray(array) {
-    const copy = [...array];
-    for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-}
-
-function isOriginalOrder(ids) {
-    return ids.every((id, index) => id === questions[index].id);
-}
-
-let questionOrder = JSON.parse(localStorage.getItem(orderKey) || "null");
-
-if (!Array.isArray(questionOrder) ||
-    questionOrder.length !== questions.length ||
-    new Set(questionOrder).size !== questions.length ||
-    !questionOrder.every(id => questions.some(q => q.id === id))) {
-
-    do {
-        questionOrder = shuffleArray(questions.map(q => q.id));
-    } while (isOriginalOrder(questionOrder));
-
-    localStorage.setItem(orderKey, JSON.stringify(questionOrder));
-}
-
-const orderedQuestions = questionOrder.map(
-    id => questions.find(q => q.id === id)
-);
+let page5Loaded = false;
+let isSaving = false;
 
 function t(en, si, ta) {
     if (language === "සිංහල") return si;
@@ -532,41 +497,28 @@ function getQuestionText(question) {
     return question.en;
 }
 
-
 const optionLabels = {
     "Mango":["අඹ","மாம்பழம்"], "Apple":["ඇපල්","ஆப்பிள்"], "Orange":["දොඩම්","ஆரஞ்சு"], "Grapes":["මිදි","திராட்சை"],
     "Pineapple":["අන්නාසි","அன்னாசி"], "Watermelon":["කොමඩු","தர்பூசணி"], "Strawberry":["ස්ට්‍රෝබෙරි","ஸ்ட்ராபெர்ரி"], "Banana":["කෙසෙල්","வாழைப்பழம்"],
     "Pizza":["පීසා","பீட்சா"], "Burger":["බර්ගර්","பர்கர்"], "Rice":["බත්","சாதம்"], "Noodles":["නූඩ්ල්ස්","நூடுல்ஸ்"],
     "Kottu":["කොත්තු","கொத்து"], "Pasta":["පැස්ටා","பாஸ்தா"], "Chicken":["කුකුල් මස්","கோழி இறைச்சி"], "Seafood":["මුහුදු ආහාර","கடல் உணவு"],
     "Tea":["තේ","தேநீர்"], "Coffee":["කෝපි","காபி"], "Juice":["පළතුරු යුෂ","பழச்சாறு"], "Soft Drink":["සිසිල් බීම","குளிர்பானம்"],
-    "Milkshake":["මිල්ක්ෂේක්","மில்க்ஷேக்"], "Water":["වතුර","தண்ணீர்"], "Chocolate Drink":["චොකලට් පානය","சாக்லேட் பானம்"], "Fruit Smoothie":["පළතුරු ස්මූති","பழ ஸ்மூத்தி"],
-    "Beach":["මුහුදු වෙරළ","கடற்கரை"], "Restaurant":["අවන්හල","உணவகம்"], "Cinema":["සිනමා ශාලාව","திரையரங்கம்"], "Park":["උද්‍යානය","பூங்கா"],
-    "Mountain":["කඳුකරය","மலை"], "Hotel":["හෝටලය","ஹோட்டல்"], "Cafe":["කැෆේ","கஃபே"], "Waterfall":["දිය ඇල්ල","நீர்வீழ்ச்சி"],
-    "Sunny":["හිරු එළිය සහිත","வெயில்"], "Rainy":["වැසි සහිත","மழை"], "Cloudy":["වලාකුළු සහිත","மேகமூட்டம்"], "Cool":["සිසිල්","குளிர்ச்சி"],
-    "Snowy":["හිම සහිත","பனி"], "Windy":["සුළං සහිත","காற்று"], "Sunset":["හිරු බැසීම","சூரிய அஸ்தமனம்"], "Night":["රාත්‍රිය","இரவு"],
-    "Dog":["බල්ලා","நாய்"], "Cat":["පූසා","பூனை"], "Bird":["කුරුල්ලා","பறவை"], "Rabbit":["හාවා","முயல்"], "Fish":["මාළුවා","மீன்"],
-    "Hamster":["හැම්ස්ටර්","ஹாம்ஸ்டர்"], "Parrot":["ගිරවා","கிளி"], "Turtle":["කැස්බෑවා","ஆமை"],
-    "Rose":["රෝස","ரோஜா"], "Sunflower":["සූරියකාන්ත","சூரியகாந்தி"], "Lotus":["නෙළුම්","தாமரை"], "Lily":["ලිලී","லில்லி"],
-    "Tulip":["ටියුලිප්","ட்யூலிப்"], "Orchid":["ඕකිඩ්","ஆர்க்கிட்"], "Jasmine":["පිච්ච","மல்லிகை"], "Daisy":["ඩේසි","டெய்சி"],
-    "Red":["රතු","சிவப்பு"], "Blue":["නිල්","நீலம்"], "Black":["කළු","கருப்பு"], "White":["සුදු","வெள்ளை"], "Pink":["රෝස පාට","இளஞ்சிவப்பு"],
-    "Purple":["දම්","ஊதா"], "Green":["කොළ","பச்சை"], "Yellow":["කහ","மஞ்சள்"],
-    "Romance":["ආදර","காதல்"], "Comedy":["විකට","நகைச்சுவை"], "Action":["ක්‍රියාදාම","அதிரடி"], "Horror":["භීෂණ","திகில்"],
-    "Adventure":["ත්‍රාසජනක","சாகசம்"], "Animation":["සජීවිකරණ","அனிமேஷன்"], "Mystery":["අභිරහස්","மர்மம்"], "Drama":["නාට්‍යමය","நாடகம்"],
-    "Stay Home":["ගෙදර ඉන්න","வீட்டில் இருப்பது"], "Travel":["සංචාරය කරන්න","பயணம்"], "Shopping":["සාප්පු සවාරි","ஷாப்பிங்"],
-    "Meet Friends":["යහළුවන් හමුවන්න","நண்பர்களை சந்திப்பது"], "Watch Movies":["චිත්‍රපට බලන්න","திரைப்படம் பார்ப்பது"], "Go to Beach":["මුහුදු වෙරළට යන්න","கடற்கரைக்கு செல்வது"],
-    "Sleep":["නිදාගන්න","தூங்குவது"], "Play Games":["ක්‍රීඩා කරන්න","விளையாடுவது"],
-    "Flowers":["මල්","மலர்கள்"], "Chocolate":["චොකලට්","சாக்லேட்"], "Perfume":["සුවඳ විලවුන්","வாசனை திரவியம்"], "Clothes":["ඇඳුම්","ஆடைகள்"],
-    "Jewelry":["ආභරණ","நகைகள்"], "Teddy Bear":["ටෙඩි බෙයාර්","டெடி பியர்"], "Phone":["දුරකථනය","தொலைபேசி"], "Watch":["අත් ඔරලෝසුව","கைக்கடிகாரம்"],
-    "Beach Trip":["මුහුදු වෙරළ සංචාරය","கடற்கரை பயணம்"], "Mountain Trip":["කඳුකර සංචාරය","மலைப் பயணம்"], "City Trip":["නගර සංචාරය","நகரப் பயணம்"],
-    "Nature Trip":["ස්වභාවික සංචාරය","இயற்கைப் பயணம்"], "Camping":["කඳවුරු බැඳීම","முகாமிடுதல்"], "Road Trip":["මාර්ග සංචාරය","சாலைப் பயணம்"],
-    "Luxury Hotel":["සුඛෝපභෝගී හෝටලය","ஆடம்பர ஹோட்டல்"], "Foreign Trip":["විදේශ සංචාරය","வெளிநாட்டு பயணம்"],
-    "Dinner Date":["රාත්‍රී ආහාර හමුව","இரவு உணவு சந்திப்பு"], "Long Drive":["දිගු රිය ගමන","நீண்ட கார் பயணம்"], "Beach Walk":["මුහුදු වෙරළේ ඇවිදීම","கடற்கரை நடை"],
-    "Movie Night":["චිත්‍රපට රාත්‍රිය","திரைப்பட இரவு"], "Cooking Together":["එකට ඉවුම් පිහුම්","சேர்ந்து சமைத்தல்"], "Travel Together":["එකට සංචාරය","சேர்ந்து பயணம்"],
-    "Coffee Date":["කෝපි හමුව","காபி சந்திப்பு"], "Sunset Date":["හිරු බැසීමේ හමුව","சூரிய அஸ்தமன சந்திப்பு"],
-    "Ice Cream":["අයිස්ක්‍රීම්","ஐஸ்கிரீம்"], "Cake":["කේක්","கேக்"], "Donut":["ඩෝනට්","டோனட்"], "Pudding":["පුඩිං","புட்டிங்"],
-    "Cupcake":["කප්කේක්","கப்கேக்"], "Fruit Salad":["පලතුරු සලාද","பழச்சலாடு"], "Waffle":["වොෆල්","வாஃபிள்"],
-    "Happy Family":["සතුටු පවුලක්","மகிழ்ச்சியான குடும்பம்"], "Travel World":["ලෝකය සංචාරය කිරීම","உலகம் சுற்றுதல்"], "Dream Home":["සිහින නිවස","கனவு வீடு"],
-    "Successful Career":["සාර්ථක වෘත්තිය","வெற்றிகரமான தொழில்"], "Own Business":["තමන්ගේ ව්‍යාපාරයක්","சொந்த தொழில்"], "Peaceful Life":["සාමකාමී ජීවිතයක්","அமைதியான வாழ்க்கை"],
+    "Milkshake":["මිල්ක්ෂේක්","மில்க்ஷேக்"], "Hot Chocolate":["හොට් චොකලට්","ஹாட் சாக்லேட்"], "Energy Drink":["එනර්ජි ඩ්‍රින්ක්","எனர்ஜி டிரிங்"], "Water":["වතුර","தண்ணீர்"],
+    "Beach":["වෙරළ","கடற்கரை"], "Mountains":["කඳු","மலைகள்"], "City":["නගරය","நகரம்"], "Village":["ගම","கிராமம்"],
+    "Hotel":["හෝටලය","ஹோட்டல்"], "Home":["ගෙදර","வீடு"], "Park":["උද්‍යානය","பூங்கா"], "River":["ගඟ","ஆறு"],
+    "Morning":["උදෑසන","காலை"], "Afternoon":["දහවල්","மதியம்"], "Evening":["සවස","மாலை"], "Night":["රාත්‍රිය","இரவு"],
+    "Summer":["ගිම්හානය","கோடை"], "Rainy":["වැසි කාලය","மழைக்காலம்"], "Winter":["ශීත කාලය","குளிர்காலம்"], "Spring":["වසන්තය","வசந்தம்"],
+    "Red":["රතු","சிவப்பு"], "Blue":["නිල්","நீலம்"], "Black":["කළු","கருப்பு"], "White":["සුදු","வெள்ளை"],
+    "Pink":["රෝස","இளஞ்சிவப்பு"], "Green":["කොළ","பச்சை"], "Purple":["දම්","ஊதா"], "Yellow":["කහ","மஞ்சள்"],
+    "Dog":["බල්ලා","நாய்"], "Cat":["පූසා","பூனை"], "Bird":["කුරුල්ලා","பறவை"], "Fish":["මාළු","மீன்"],
+    "Rabbit":["හාවා","முயல்"], "Horse":["අශ්වයා","குதிரை"], "Lion":["සිංහයා","சிங்கம்"], "Elephant":["අලියා","யானை"],
+    "Car":["කාර්","கார்"], "Bike":["බයිසිකලය","பைக்"], "Bus":["බස්","பஸ்"], "Train":["දුම්රිය","ரயில்"],
+    "Plane":["ගුවන් යානය","விமானம்"], "Boat":["බෝට්ටුව","படகு"], "Walking":["පයින් යෑම","நடப்பு"], "Taxi":["ටැක්සි","டாக்ஸி"],
+    "Facebook":["ෆේස්බුක්","பேஸ்புக்"], "TikTok":["ටික්ටොක්","டிக்டாக்"], "Instagram":["ඉන්ස්ටග්‍රෑම්","இன்ஸ்டாகிராம்"], "YouTube":["යූටියුබ්","யூடியூப்"],
+    "WhatsApp":["වට්ස්ඇප්","வாட்ஸ்அப்"], "Snapchat":["ස්නැප්චැට්","ஸ்னாப்சாட்"], "Reddit":["රෙඩිට්","ரெடிட்"], "Telegram":["ටෙලිග්‍රෑම්","டெலிகிராம்"],
+    "Happy Family":["සතුටු පවුලක්","மகிழ்ச்சியான குடும்பம்"], "Travel World":["ලෝකය වටා සංචාරය","உலகம் சுற்றிப் பயணம்"],
+    "Dream Home":["සිහින නිවස","கனவு வீடு"], "Successful Career":["සාර්ථක වෘත්තිය","வெற்றிகரமான தொழில்"],
+    "Own Business":["තමන්ගේම ව්‍යාපාරයක්","சொந்த தொழில்"], "Peaceful Life":["සාමකාමී ජීවිතයක්","அமைதியான வாழ்க்கை"],
     "Luxury Life":["සුඛෝපභෝගී ජීවිතයක්","ஆடம்பர வாழ்க்கை"], "Adventure Life":["ත්‍රාසජනක ජීවිතයක්","சாகச வாழ்க்கை"]
 };
 
@@ -578,32 +530,29 @@ function getOptionLabel(name) {
     return name;
 }
 
+/*
+IMPORTANT:
+Page 5 NEVER creates a new random set of 4 image answers.
+It uses the exact shared four options saved from Page 4,
+matched by question.id (q4, q5 ... q20).
+Only the QUESTION ORDER is random.
+*/
 function getOptions(question) {
     const saved = savedOptionSets[question.id];
 
-    if (Array.isArray(saved) && saved.length === 4) {
-        const normalized = saved
-            .map(item => {
-                const value = Array.isArray(item)
-                    ? item[0]
-                    : (item && typeof item === "object" ? item.value : item);
-
-                return question.pool.find(
-                    poolItem => poolItem[0] === value
-                ) || null;
-            })
-            .filter(Boolean);
-
-        if (normalized.length === 4) {
-            return normalized;
-        }
+    if (!Array.isArray(saved) || saved.length !== 4) {
+        return [];
     }
 
-    /*
-    Compatibility fallback only.
-    It keeps the existing Page 5 image names/paths unchanged.
-    */
-    return shuffleArray(question.pool).slice(0, 4);
+    return saved
+        .map(item => {
+            const value = Array.isArray(item)
+                ? item[0]
+                : (item && typeof item === "object" ? item.value : item);
+
+            return question.pool.find(poolItem => poolItem[0] === value) || null;
+        })
+        .filter(Boolean);
 }
 
 function setupIntro() {
@@ -614,9 +563,9 @@ function setupIntro() {
     );
 
     document.getElementById("introText").textContent = t(
-        "Your answers are complete. Now choose the answer you think your partner would choose for each question. Complete all 20 questions and test how well you understand each other.",
-        "ඔබගේ පිළිතුරු දැන් සම්පූර්ණයි. දැන් එක් එක් ප්‍රශ්නයට ඔබගේ සහකරු/සහකාරිය තෝරාගනීවි කියලා ඔබ සිතන පිළිතුර තෝරන්න. ප්‍රශ්න 20ම සම්පූර්ණ කර ඔබ දෙදෙනා එකිනෙකා ගැන කොච්චර හොඳින් දන්නවාද කියලා බලමු.",
-        "உங்கள் பதில்கள் முடிந்துவிட்டன. இப்போது ஒவ்வொரு கேள்விக்கும் உங்கள் துணை தேர்வு செய்வார் என்று நீங்கள் நினைக்கும் பதிலைத் தேர்ந்தெடுக்கவும். 20 கேள்விகளையும் முடித்து நீங்கள் ஒருவரை ஒருவர் எவ்வளவு நன்றாக அறிந்திருக்கிறீர்கள் என்பதை பார்ப்போம்."
+        "Your Page 4 answers are complete. Page 5 will ask the same 20 questions in a random order. For image questions, the exact same four choices from Page 4 are used. Choose what you think your partner answered.",
+        "Page 4 පිළිතුරු සම්පූර්ණයි. Page 5 එකේ ඒ ප්‍රශ්න 20ම random පිළිවෙළකට එනවා. Image ප්‍රශ්නවල Page 4 එකේ තිබුණු ඒ options 4ම මෙහිත් එනවා. ඔබගේ සහකරු/සහකාරිය Page 4 එකේ දුන් පිළිතුර මොකක්ද කියලා ඔබ සිතන එක තෝරන්න.",
+        "Page 4 பதில்கள் முடிந்துவிட்டன. Page 5-ல் அதே 20 கேள்விகள் சீரற்ற வரிசையில் வரும். படக் கேள்விகளில் Page 4-ல் இருந்த அதே நான்கு தேர்வுகள் பயன்படுத்தப்படும். உங்கள் துணை அளித்த பதிலை நீங்கள் ஊகிக்கவும்."
     );
 
     document.getElementById("startBtn").textContent = t(
@@ -626,15 +575,131 @@ function setupIntro() {
     );
 }
 
-function saveGuesses() {
+function saveLocalDraft() {
     localStorage.setItem(guessKey, JSON.stringify(guesses));
+}
+
+function validateQuestionOrder(order) {
+    if (!Array.isArray(order) || order.length !== 20) return false;
+    if (new Set(order).size !== 20) return false;
+
+    const validIds = new Set(questions.map(q => q.id));
+    return order.every(id => validIds.has(id));
+}
+
+async function loadPage5FromServer() {
+    const startBtn = document.getElementById("startBtn");
+    startBtn.disabled = true;
+    startBtn.textContent = t(
+        "Loading...",
+        "දත්ත ලබාගනිමින්...",
+        "தரவு ஏற்றப்படுகிறது..."
+    );
+
+    try {
+        const response = await fetch(
+            "/api/couples/" +
+            encodeURIComponent(coupleId) +
+            "/page5/" +
+            encodeURIComponent(partnerId)
+        );
+
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (_) {}
+
+        if (!response.ok) {
+            throw new Error(data.message || "Could not load Page 5.");
+        }
+
+        if (!validateQuestionOrder(data.questionOrder)) {
+            throw new Error("Invalid question order received from server.");
+        }
+
+        questionOrder = data.questionOrder;
+        savedOptionSets =
+            data.optionSets && typeof data.optionSets === "object"
+                ? data.optionSets
+                : {};
+
+        guesses =
+            data.guesses && typeof data.guesses === "object"
+                ? data.guesses
+                : {};
+
+        // Keep any unsaved browser draft only for unanswered fields.
+        try {
+            const localDraft = JSON.parse(localStorage.getItem(guessKey) || "{}");
+            Object.keys(localDraft).forEach(qid => {
+                if (
+                    (guesses[qid] === undefined ||
+                     guesses[qid] === null ||
+                     String(guesses[qid]).trim() === "") &&
+                    localDraft[qid] !== undefined
+                ) {
+                    guesses[qid] = localDraft[qid];
+                }
+            });
+        } catch (_) {}
+
+        orderedQuestions = questionOrder
+            .map(id => questions.find(q => q.id === id))
+            .filter(Boolean);
+
+        if (orderedQuestions.length !== 20) {
+            throw new Error("Could not build all 20 questions.");
+        }
+
+        // Verify that every image question has the Page 4 shared four options.
+        const missingOptions = questions
+            .filter(q => q.type === "image")
+            .filter(q => getOptions(q).length !== 4)
+            .map(q => q.id);
+
+        if (missingOptions.length > 0) {
+            throw new Error(
+                "Page 4 shared options are missing for: " +
+                missingOptions.join(", ")
+            );
+        }
+
+        localStorage.setItem(guessKey, JSON.stringify(guesses));
+
+        if (data.page5Completed) {
+            localStorage.setItem(completedKey, "true");
+        }
+
+        page5Loaded = true;
+        startBtn.disabled = false;
+        setupIntro();
+
+    } catch (error) {
+        console.error("Page 5 load error:", error);
+
+        startBtn.disabled = true;
+        startBtn.textContent = t(
+            "Page 5 is not ready",
+            "Page 5 තවම සූදානම් නැහැ",
+            "Page 5 இன்னும் தயாராக இல்லை"
+        );
+
+        document.getElementById("introText").textContent =
+            t(
+                error.message || "Could not load Page 5.",
+                error.message || "Page 5 දත්ත ලබාගන්න බැරි වුණා.",
+                error.message || "Page 5 தரவை ஏற்ற முடியவில்லை."
+            );
+    }
 }
 
 function renderQuestion() {
     const question = orderedQuestions[currentQuestion];
+    if (!question) return;
 
     document.getElementById("questionNumber").textContent =
-        "QUESTION " + String(currentQuestion + 1).padStart(2, "0");
+        t("QUESTION ", "ප්‍රශ්නය ", "கேள்வி ") +
+        String(currentQuestion + 1).padStart(2, "0");
 
     document.getElementById("progressText").textContent =
         t(
@@ -647,18 +712,18 @@ function renderQuestion() {
         ((currentQuestion + 1) / 20 * 100) + "%";
 
     document.getElementById("partnerHint").textContent = t(
-        "What do you think the person you love would answer?",
-        "ඔබගේ සහකරු/සහකාරිය මෙයට දෙන පිළිතුර මොකක්ද කියලා ඔබ සිතනවාද?",
-        "உங்கள் துணை இதற்கு என்ன பதில் அளிப்பார் என்று நினைக்கிறீர்கள்?"
+        "What do you think the person you love answered on Page 4?",
+        "ඔබගේ සහකරු/සහකාරිය Page 4 එකේ දුන් පිළිතුර මොකක්ද කියලා ඔබ සිතනවාද?",
+        "Page 4-ல் உங்கள் துணை என்ன பதில் அளித்தார் என்று நினைக்கிறீர்கள்?"
     );
 
     document.getElementById("questionText").textContent =
         getQuestionText(question);
 
     document.getElementById("noteText").textContent = t(
-        "Your Page 4 answer is hidden. Choose only what you think your partner would answer ❤️",
-        "Page 4 එකේ ඔබ දුන් පිළිතුර මෙහි පෙන්වන්නේ නැහැ. ඔබගේ සහකරු/සහකාරිය දෙන පිළිතුර කියලා සිතන එක තෝරන්න ❤️",
-        "Page 4-ல் நீங்கள் கொடுத்த பதில் இங்கே காட்டப்படாது. உங்கள் துணை தேர்வு செய்வார் என்று நினைக்கும் பதிலை மட்டும் தேர்ந்தெடுக்கவும் ❤️"
+        "Your own Page 4 answer is hidden. Guess your partner's answer ❤️",
+        "ඔබ Page 4 එකේ දුන් පිළිතුර මෙහි පෙන්වන්නේ නැහැ. සහකරු/සහකාරිය දුන් පිළිතුර අනුමාන කරන්න ❤️",
+        "உங்கள் Page 4 பதில் இங்கே காட்டப்படாது. உங்கள் துணையின் பதிலை ஊகிக்கவும் ❤️"
     );
 
     const answerArea = document.getElementById("answerArea");
@@ -668,28 +733,50 @@ function renderQuestion() {
         const input = document.createElement("input");
         input.type = question.id === "q2" ? "date" : "text";
         input.className = "answer-input";
-        input.placeholder = t(
-            "Type your guess here...",
-            "ඔබගේ අනුමානය මෙහි ලියන්න...",
-            "உங்கள் ஊகத்தை இங்கே எழுதுங்கள்..."
-        );
+
+        if (question.id !== "q2") {
+            input.placeholder = t(
+                "Type your guess here...",
+                "ඔබගේ අනුමානය මෙහි ලියන්න...",
+                "உங்கள் ஊகத்தை இங்கே எழுதுங்கள்..."
+            );
+        }
+
         input.value = guesses[question.id] || "";
 
         input.addEventListener("input", function () {
             guesses[question.id] = this.value.trim();
-            saveGuesses();
+            saveLocalDraft();
             updateNextButton();
         });
 
         answerArea.appendChild(input);
+
     } else {
+        const options = getOptions(question);
+
+        if (options.length !== 4) {
+            answerArea.innerHTML =
+                '<div style="color:#ff91a7;text-align:center;padding:20px;">' +
+                t(
+                    "Page 4 options could not be loaded.",
+                    "Page 4 options ලබාගන්න බැරි වුණා.",
+                    "Page 4 தேர்வுகளை ஏற்ற முடியவில்லை."
+                ) +
+                "</div>";
+
+            document.getElementById("nextBtn").disabled = true;
+            return;
+        }
+
         const optionsContainer = document.createElement("div");
         optionsContainer.className = "image-options";
 
-        getOptions(question).forEach(option => {
+        options.forEach(option => {
             const name = option[0];
             const image = option[1];
             const displayName = getOptionLabel(name);
+
             const card = document.createElement("div");
             card.className = "image-option";
 
@@ -706,9 +793,9 @@ function renderQuestion() {
 
             card.addEventListener("click", function () {
                 guesses[question.id] = name;
-                saveGuesses();
+                saveLocalDraft();
 
-                document.querySelectorAll(".image-option")
+                optionsContainer.querySelectorAll(".image-option")
                     .forEach(item => item.classList.remove("selected"));
 
                 card.classList.add("selected");
@@ -721,24 +808,130 @@ function renderQuestion() {
         answerArea.appendChild(optionsContainer);
     }
 
-    document.getElementById("backBtn").disabled = currentQuestion === 0;
+    document.getElementById("backBtn").disabled =
+        currentQuestion === 0 || isSaving;
 
     const nextBtn = document.getElementById("nextBtn");
-    nextBtn.textContent = currentQuestion === orderedQuestions.length - 1
-        ? t("Save Partner Answers ❤️", "සහකරුගේ පිළිතුරු සුරකින්න ❤️", "துணை பதில்களை சேமிக்கவும் ❤️")
-        : t("Next ❤️", "ඊළඟ ප්‍රශ්නය ❤️", "அடுத்த கேள்வி ❤️");
+
+    nextBtn.textContent =
+        currentQuestion === orderedQuestions.length - 1
+            ? t(
+                "Save Partner Answers ❤️",
+                "සහකරුගේ පිළිතුරු සුරකින්න ❤️",
+                "துணை பதில்களை சேமிக்கவும் ❤️"
+            )
+            : t(
+                "Next ❤️",
+                "ඊළඟ ප්‍රශ්නය ❤️",
+                "அடுத்த கேள்வி ❤️"
+            );
 
     updateNextButton();
 }
 
 function updateNextButton() {
+    if (!page5Loaded || isSaving) {
+        document.getElementById("nextBtn").disabled = true;
+        return;
+    }
+
     const question = orderedQuestions[currentQuestion];
-    const value = guesses[question.id];
+    const value = question ? guesses[question.id] : null;
+
     document.getElementById("nextBtn").disabled =
         !value || String(value).trim() === "";
 }
 
+function allGuessesAnswered() {
+    return questions.every(question => {
+        const value = guesses[question.id];
+        return value !== undefined &&
+               value !== null &&
+               String(value).trim() !== "";
+    });
+}
+
+async function savePage5ToServer() {
+    if (isSaving) return;
+
+    if (!allGuessesAnswered()) {
+        alert(t(
+            "Please answer all 20 questions.",
+            "කරුණාකර ප්‍රශ්න 20ටම පිළිතුරු දෙන්න.",
+            "தயவுசெய்து 20 கேள்விகளுக்கும் பதிலளிக்கவும்."
+        ));
+        return;
+    }
+
+    isSaving = true;
+
+    const nextBtn = document.getElementById("nextBtn");
+    const backBtn = document.getElementById("backBtn");
+
+    nextBtn.disabled = true;
+    backBtn.disabled = true;
+    nextBtn.textContent = t(
+        "Saving...",
+        "සුරකිමින්...",
+        "சேமிக்கப்படுகிறது..."
+    );
+
+    try {
+        const response = await fetch(
+            "/api/couples/" +
+            encodeURIComponent(coupleId) +
+            "/page5",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    partnerId: Number(partnerId),
+                    guesses: guesses
+                })
+            }
+        );
+
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (_) {}
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Could not save Page 5 answers."
+            );
+        }
+
+        localStorage.setItem(guessKey, JSON.stringify(guesses));
+        localStorage.setItem(completedKey, "true");
+
+        alert(t(
+            "Your partner quiz answers have been saved ❤️",
+            "ඔබගේ සහකරු/සහකාරිය ගැන දුන් පිළිතුරු සාර්ථකව සුරැකුණා ❤️",
+            "உங்கள் துணையைப் பற்றிய பதில்கள் வெற்றிகரமாக சேமிக்கப்பட்டன ❤️"
+        ));
+
+        window.location.href = "page6.html";
+
+    } catch (error) {
+        console.error("Page 5 save error:", error);
+        isSaving = false;
+
+        alert(t(
+            error.message || "Could not save your answers. Please try again.",
+            error.message || "පිළිතුරු සුරැකීමට නොහැකි වුණා. නැවත උත්සාහ කරන්න.",
+            error.message || "பதில்களை சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
+        ));
+
+        renderQuestion();
+    }
+}
+
 document.getElementById("startBtn").addEventListener("click", function () {
+    if (!page5Loaded) return;
+
     document.getElementById("introScreen").style.display = "none";
     document.getElementById("quizScreen").style.display = "block";
     renderQuestion();
@@ -746,6 +939,8 @@ document.getElementById("startBtn").addEventListener("click", function () {
 });
 
 document.getElementById("backBtn").addEventListener("click", function () {
+    if (isSaving) return;
+
     if (currentQuestion > 0) {
         currentQuestion--;
         renderQuestion();
@@ -753,32 +948,28 @@ document.getElementById("backBtn").addEventListener("click", function () {
     }
 });
 
-document.getElementById("nextBtn").addEventListener("click", function () {
+document.getElementById("nextBtn").addEventListener("click", async function () {
+    if (isSaving) return;
+
     const question = orderedQuestions[currentQuestion];
+    if (!question || !guesses[question.id] ||
+        String(guesses[question.id]).trim() === "") {
+        return;
+    }
 
-    if (!guesses[question.id]) return;
-
-    saveGuesses();
+    saveLocalDraft();
 
     if (currentQuestion < orderedQuestions.length - 1) {
         currentQuestion++;
         renderQuestion();
         window.scrollTo({top:0, behavior:"smooth"});
     } else {
-        localStorage.setItem(completedKey, "true");
-
-        alert(t(
-            "Your partner quiz answers have been saved ❤️",
-            "ඔබගේ සහකරු/සහකාරිය ගැන දුන් පිළිතුරු සුරැකුණා ❤️",
-            "உங்கள் துணையைப் பற்றிய பதில்கள் சேமிக்கப்பட்டன ❤️"
-        ));
-
-        // Page 6 can compare these guesses with the partner's Page 4 answers.
-        window.location.href = "page6.html";
+        await savePage5ToServer();
     }
 });
 
 setupIntro();
+loadPage5FromServer();
 </script>
 </body>
 </html>
