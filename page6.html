@@ -3,210 +3,1616 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Miracle Quiz - Our Result ❤️</title>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:Arial,sans-serif;color:#fff;background:radial-gradient(circle at top,#3b0711 0,#160308 38%,#050203 100%);overflow-x:hidden}
-.page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 14px}
-.container{width:min(920px,100%);text-align:center}
-.logo{font-size:38px;font-weight:800;letter-spacing:-1px}.logo span{color:#ff315d}
-.brand{margin:4px 0 22px;color:#ff6b86;font-size:12px;letter-spacing:3px}
-.heart{font-size:42px;filter:drop-shadow(0 0 16px #ff174f);animation:pulse 1.5s infinite}
-.card{background:rgba(16,4,7,.92);border:1px solid rgba(255,55,95,.28);border-radius:26px;padding:38px 28px;box-shadow:0 22px 70px rgba(0,0,0,.55),0 0 38px rgba(255,0,55,.08)}
-.hidden{display:none!important}
-.wait-title,.result-title{font-size:30px;font-weight:800;margin-bottom:10px}
-.sub{color:#d8bcc3;line-height:1.65;max-width:650px;margin:0 auto}
-.loader{width:48px;height:48px;border:4px solid #4d1722;border-top-color:#ff315d;border-radius:50%;margin:28px auto 16px;animation:spin 1s linear infinite}
-.status{color:#ff91a5;font-size:14px;margin-bottom:12px}.error{color:#ff8096;margin:12px 0}
-.btn,.share-btn{border:0;border-radius:14px;padding:13px 20px;font-weight:800;cursor:pointer;transition:.2s}
-.btn{margin-top:18px;color:#fff;background:linear-gradient(135deg,#ff174f,#9d0b2b);box-shadow:0 8px 24px rgba(255,23,79,.25)}
-.btn:hover,.share-btn:hover{transform:translateY(-2px)}
-.test-note{font-size:12px;color:#9f7d85;margin-top:10px}
-.scores{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:26px 0}
-.score-card{padding:24px 16px;border-radius:20px;background:linear-gradient(180deg,rgba(255,35,80,.12),rgba(255,255,255,.025));border:1px solid rgba(255,75,110,.22)}
-.name{font-size:19px;font-weight:800}.score{font-size:48px;font-weight:900;color:#ff4c70;margin:8px 0}.correct{color:#d5b8c0}
-.overall{padding:25px;border-radius:22px;background:rgba(255,23,79,.08);border:1px solid rgba(255,75,110,.28)}
-.overall-label{font-size:13px;letter-spacing:2px;color:#ff91a5}.overall-score{font-size:64px;font-weight:900;margin:5px 0;color:#fff;text-shadow:0 0 22px rgba(255,49,93,.45)}
-.message{font-size:18px;line-height:1.55}.reaction{font-size:48px;margin:12px 0}
-.details{margin:15px 0 25px;color:#ffafbd;font-weight:700}
-.share-title{margin-top:26px;font-weight:800}.share-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0}
-.share-btn{background:#fff;color:#24050c}.share-icon{margin-right:6px}
-.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:10}.piece{position:absolute;top:-50px;animation:fall linear forwards}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.12)}}@keyframes fall{to{transform:translateY(115vh) rotate(720deg);opacity:.15}}
-@media(max-width:650px){.scores{grid-template-columns:1fr}.card{padding:26px 15px}.wait-title,.result-title{font-size:25px}.overall-score{font-size:52px}.logo{font-size:32px}}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    min-height:100vh;
+    font-family:Arial,sans-serif;
+    color:#fff;
+    background:
+        radial-gradient(
+            circle at top,
+            #42000b 0%,
+            #170005 35%,
+            #050505 72%
+        );
+}
+
+.page{
+    min-height:100vh;
+    padding:30px 15px;
+}
+
+.container{
+    width:100%;
+    max-width:900px;
+    margin:auto;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.logo-heart{
+    font-size:48px;
+    filter:drop-shadow(0 0 16px #ff1748);
+    animation:heartbeat 1.8s infinite;
+}
+
+@keyframes heartbeat{
+    0%,100%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.12);
+    }
+}
+
+.logo{
+    font-size:38px;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.logo span{
+    color:#ff3159;
+}
+
+.brand{
+    color:#aaa;
+    font-size:12px;
+    letter-spacing:2px;
+    margin-top:5px;
+}
+
+
+/* =====================================================
+   WAITING CARD
+===================================================== */
+
+.waiting-card{
+    margin-top:25px;
+    padding:40px 25px;
+    border-radius:24px;
+
+    background:rgba(18,7,10,.96);
+
+    border:1px solid rgba(255,49,89,.3);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.55),
+        0 0 30px rgba(255,20,60,.07);
+
+    text-align:center;
+}
+
+.waiting-heart{
+    font-size:65px;
+    margin-bottom:20px;
+    animation:heartbeat 1.5s infinite;
+}
+
+.waiting-title{
+    font-size:28px;
+    margin-bottom:14px;
+}
+
+.waiting-text{
+    color:#cdbbc0;
+    font-size:16px;
+    line-height:1.7;
+}
+
+.loader{
+    width:42px;
+    height:42px;
+
+    border:4px solid #39131c;
+    border-top-color:#ff3159;
+
+    border-radius:50%;
+
+    margin:28px auto 0;
+
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+
+/* =====================================================
+   RESULT
+===================================================== */
+
+.result-card{
+    display:none;
+
+    margin-top:25px;
+    padding:32px;
+
+    border-radius:24px;
+
+    background:rgba(18,7,10,.97);
+
+    border:1px solid rgba(255,49,89,.3);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.55),
+        0 0 35px rgba(255,20,60,.08);
+}
+
+.result-top{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.result-icon{
+    font-size:65px;
+    margin-bottom:12px;
+}
+
+.result-title{
+    font-size:31px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.result-subtitle{
+    color:#cbb8bd;
+    font-size:16px;
+    line-height:1.7;
+}
+
+
+/* =====================================================
+   PARTNER SCORES
+===================================================== */
+
+.partner-scores{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:25px;
+}
+
+.partner-card{
+    background:#11090b;
+
+    border:1px solid #43202a;
+
+    border-radius:20px;
+
+    padding:24px 18px;
+
+    text-align:center;
+}
+
+.partner-icon{
+    font-size:38px;
+    margin-bottom:10px;
+}
+
+.partner-name{
+    color:#ddd;
+    font-size:15px;
+    margin-bottom:12px;
+}
+
+.partner-score{
+    color:#ff3159;
+    font-size:42px;
+    font-weight:bold;
+}
+
+.partner-score-small{
+    color:#aaa;
+    font-size:13px;
+    margin-top:6px;
+}
+
+
+/* =====================================================
+   COUPLE SCORE
+===================================================== */
+
+.couple-score-box{
+    margin-top:22px;
+
+    padding:30px 20px;
+
+    text-align:center;
+
+    border-radius:22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(120,0,30,.35),
+            rgba(30,5,10,.95)
+        );
+
+    border:1px solid rgba(255,49,89,.45);
+
+    box-shadow:
+        0 0 30px rgba(255,30,70,.12);
+}
+
+.couple-score-label{
+    color:#ff91a7;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+}
+
+.couple-score{
+    font-size:72px;
+    font-weight:bold;
+    color:#fff;
+    margin-top:7px;
+
+    text-shadow:
+        0 0 25px rgba(255,49,89,.35);
+}
+
+.couple-score-total{
+    color:#aaa;
+    font-size:14px;
+}
+
+
+/* =====================================================
+   REACTION
+===================================================== */
+
+.reaction-box{
+    margin-top:22px;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    background:#0e080a;
+
+    border:1px solid #3b1c24;
+
+    text-align:center;
+}
+
+.reaction-emoji{
+    font-size:48px;
+    margin-bottom:10px;
+}
+
+.reaction-title{
+    color:#ff5676;
+    font-size:21px;
+    font-weight:bold;
+    margin-bottom:9px;
+}
+
+.reaction-message{
+    color:#d3c1c6;
+    line-height:1.7;
+    font-size:15px;
+}
+
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+    margin-top:25px;
+}
+
+.action-btn{
+    padding:15px 12px;
+
+    border:0;
+
+    border-radius:13px;
+
+    color:#fff;
+
+    font-size:14px;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.action-btn:hover{
+    transform:translateY(-2px);
+}
+
+.screenshot-btn{
+    background:
+        linear-gradient(
+            135deg,
+            #c9002f,
+            #ff3159
+        );
+}
+
+.facebook-btn{
+    background:#1877f2;
+}
+
+.instagram-btn{
+    background:
+        linear-gradient(
+            135deg,
+            #833ab4,
+            #fd1d1d,
+            #fcb045
+        );
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.error-box{
+    display:none;
+
+    margin-top:20px;
+
+    padding:16px;
+
+    border-radius:13px;
+
+    background:rgba(130,0,20,.25);
+
+    border:1px solid #6d1f30;
+
+    color:#ff9aad;
+
+    text-align:center;
+
+    line-height:1.6;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:650px){
+
+    .result-card{
+        padding:22px 15px;
+    }
+
+    .result-title{
+        font-size:25px;
+    }
+
+    .partner-scores{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .partner-card{
+        padding:20px 10px;
+    }
+
+    .partner-score{
+        font-size:34px;
+    }
+
+    .couple-score{
+        font-size:58px;
+    }
+
+    .actions{
+        grid-template-columns:1fr;
+    }
+
+    .logo{
+        font-size:31px;
+    }
+
+    .waiting-title{
+        font-size:23px;
+    }
+}
+
 </style>
 </head>
+
 <body>
-<div class="confetti" id="confetti"></div>
-<div class="page"><div class="container">
-  <div class="heart">❤️</div>
-  <div class="logo">Miracle <span>Quiz</span></div>
-  <div class="brand">BY MIRACLE HEART</div>
 
-  <section class="card" id="waiting">
-    <div class="wait-title" id="waitTitle">Waiting for your partner ❤️</div>
-    <div class="sub" id="waitText">Your answers are complete. Please wait while the person you love finishes the quiz.</div>
-    <div class="loader"></div>
-    <div class="status" id="statusText">Checking both results...</div>
-    <div class="error hidden" id="errorText"></div>
-    <button class="btn" id="testResultBtn">Test Result ❤️</button>
-    <div class="test-note" id="testNote">Development test button — remove it when the live two-partner flow is ready.</div>
-  </section>
+<div class="page">
 
-  <section class="card hidden" id="result">
-    <div class="result-title" id="resultTitle">Your Miracle Moment ❤️</div>
-    <div class="sub" id="resultSub">See how well you know each other.</div>
-    <div class="scores">
-      <div class="score-card"><div class="name" id="name1">Partner 1</div><div class="score" id="score1">0%</div><div class="correct" id="correct1">0 / 20 correct</div></div>
-      <div class="score-card"><div class="name" id="name2">Partner 2</div><div class="score" id="score2">0%</div><div class="correct" id="correct2">0 / 20 correct</div></div>
+<div class="container">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="header">
+
+        <div class="logo-heart">
+            ❤️
+        </div>
+
+        <div class="logo">
+            Miracle <span>Quiz</span>
+        </div>
+
+        <div class="brand">
+            BY MIRACLE HEART
+        </div>
+
     </div>
-    <div class="overall">
-      <div class="overall-label" id="overallLabel">OUR COUPLE SCORE</div>
-      <div class="overall-score" id="overallScore">0%</div>
-      <div class="reaction" id="reaction">❤️</div>
-      <div class="message" id="message">❤️</div>
+
+
+    <!-- =====================================================
+         WAITING SCREEN
+    ====================================================== -->
+
+    <div
+        class="waiting-card"
+        id="waitingCard"
+    >
+
+        <div class="waiting-heart">
+            💞
+        </div>
+
+        <div
+            class="waiting-title"
+            id="waitingTitle"
+        >
+            Waiting for your partner ❤️
+        </div>
+
+        <div
+            class="waiting-text"
+            id="waitingText"
+        >
+            Your quiz is complete. We are waiting for both partners
+            to finish the Partner Quiz.
+        </div>
+
+        <div class="loader"></div>
+
     </div>
-    <div class="details" id="details"></div>
-    <div class="share-title" id="shareTitle">Share your Miracle Moment ❤️</div>
-    <div class="share-actions" id="shareActions">
-      <button class="share-btn" id="screenshotBtn"><span class="share-icon">📸</span><span id="shotText">Screenshot</span></button>
-      <button class="share-btn" id="facebookBtn"><span class="share-icon">ⓕ</span>Facebook</button>
-      <button class="share-btn" id="instagramBtn"><span class="share-icon">◎</span>Instagram</button>
+
+
+    <!-- =====================================================
+         RESULT CARD
+    ====================================================== -->
+
+    <div
+        class="result-card"
+        id="resultCard"
+    >
+
+        <div id="captureArea">
+
+            <div class="result-top">
+
+                <div class="result-icon">
+                    💖
+                </div>
+
+                <div
+                    class="result-title"
+                    id="resultTitle"
+                >
+                    Our Miracle Quiz Result ❤️
+                </div>
+
+                <div
+                    class="result-subtitle"
+                    id="resultSubtitle"
+                >
+                    Let's see how well you know each other!
+                </div>
+
+            </div>
+
+
+            <!-- PARTNER SCORES -->
+
+            <div class="partner-scores">
+
+                <div class="partner-card">
+
+                    <div class="partner-icon">
+                        ❤️
+                    </div>
+
+                    <div
+                        class="partner-name"
+                        id="partner1Name"
+                    >
+                        Partner 1
+                    </div>
+
+                    <div
+                        class="partner-score"
+                        id="partner1Score"
+                    >
+                        0
+                    </div>
+
+                    <div
+                        class="partner-score-small"
+                        id="partner1ScoreText"
+                    >
+                        correct answers
+                    </div>
+
+                </div>
+
+
+                <div class="partner-card">
+
+                    <div class="partner-icon">
+                        ❤️
+                    </div>
+
+                    <div
+                        class="partner-name"
+                        id="partner2Name"
+                    >
+                        Partner 2
+                    </div>
+
+                    <div
+                        class="partner-score"
+                        id="partner2Score"
+                    >
+                        0
+                    </div>
+
+                    <div
+                        class="partner-score-small"
+                        id="partner2ScoreText"
+                    >
+                        correct answers
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- COUPLE SCORE -->
+
+            <div class="couple-score-box">
+
+                <div
+                    class="couple-score-label"
+                    id="coupleScoreLabel"
+                >
+                    Our Couple Score
+                </div>
+
+                <div
+                    class="couple-score"
+                    id="coupleScore"
+                >
+                    0%
+                </div>
+
+                <div
+                    class="couple-score-total"
+                    id="coupleScoreTotal"
+                >
+                    0 / 40 correct answers
+                </div>
+
+            </div>
+
+
+            <!-- REACTION -->
+
+            <div class="reaction-box">
+
+                <div
+                    class="reaction-emoji"
+                    id="reactionEmoji"
+                >
+                    ❤️
+                </div>
+
+                <div
+                    class="reaction-title"
+                    id="reactionTitle"
+                >
+                </div>
+
+                <div
+                    class="reaction-message"
+                    id="reactionMessage"
+                >
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTION BUTTONS -->
+
+        <div class="actions">
+
+            <button
+                class="action-btn screenshot-btn"
+                id="screenshotBtn"
+            >
+                📸 Save Result
+            </button>
+
+            <button
+                class="action-btn facebook-btn"
+                id="facebookBtn"
+            >
+                Facebook
+            </button>
+
+            <button
+                class="action-btn instagram-btn"
+                id="instagramBtn"
+            >
+                Instagram
+            </button>
+
+        </div>
+
     </div>
-    <button class="btn" id="refreshBtn">Refresh Result ❤️</button>
-  </section>
-</div></div>
+
+
+    <div
+        class="error-box"
+        id="errorBox"
+    >
+    </div>
+
+</div>
+
+</div>
+
 
 <script>
-const coupleId=localStorage.getItem("coupleId")||"";
-const language=localStorage.getItem("language")||"English";
-const T={
- English:{waitTitle:"Waiting for your partner ❤️",waitText:"Your answers are complete. Please wait while the person you love finishes the quiz.",checking:"Checking both results...",resultTitle:"Your Miracle Moment ❤️",resultSub:"See how well you know each other.",overall:"OUR COUPLE SCORE",correct:"correct",refresh:"Refresh Result ❤️",missing:"Couple information was not found. You can still use Test Result while building.",sync:"Waiting for both partners to finish...",test:"Test Result ❤️",testNote:"Development test button — remove it when the live two-partner flow is ready.",share:"Share your Miracle Moment ❤️",shot:"Screenshot"},
- "සිංහල":{waitTitle:"ඔබ ආදරේ කරන කෙනා එනතුරු රැඳී සිටින්න ❤️",waitText:"ඔබගේ පිළිතුරු සම්පූර්ණයි. අනිත් කෙනාත් ප්‍රශ්න සම්පූර්ණ කරන තුරු රැඳී සිටින්න.",checking:"දෙන්නාගේම ප්‍රතිඵල පරීක්ෂා කරමින්...",resultTitle:"ඔබගේ Miracle Moment ❤️",resultSub:"ඔබ දෙදෙනා එකිනෙකා කොතරම් හොඳින් දන්නවාද බලමු.",overall:"අපේ COUPLE SCORE",correct:"නිවැරදි",refresh:"Result එක නැවත බලන්න ❤️",missing:"Couple තොරතුරු හමු නොවුණා. Website එක හදන අතර Test Result භාවිත කරන්න පුළුවන්.",sync:"දෙන්නාම ප්‍රශ්න සම්පූර්ණ කරන තුරු රැඳී සිටින්න...",test:"Test Result ❤️",testNote:"Website එක හදන අතර test කරන්න පමණයි.",share:"ඔබගේ Miracle Moment එක Share කරන්න ❤️",shot:"Screenshot"},
- "தமிழ்":{waitTitle:"நீங்கள் காதலிக்கும் நபருக்காக காத்திருக்கவும் ❤️",waitText:"உங்கள் பதில்கள் முடிந்துவிட்டன. மற்றவர் வினாடி வினாவை முடிக்கும் வரை காத்திருக்கவும்.",checking:"இருவரின் முடிவுகளையும் சரிபார்க்கிறது...",resultTitle:"உங்கள் Miracle Moment ❤️",resultSub:"நீங்கள் ஒருவரை ஒருவர் எவ்வளவு நன்றாக அறிவீர்கள் என்று பாருங்கள்.",overall:"OUR COUPLE SCORE",correct:"சரி",refresh:"Result-ஐ புதுப்பிக்கவும் ❤️",missing:"Couple தகவல் கிடைக்கவில்லை. உருவாக்கும் போது Test Result பயன்படுத்தலாம்.",sync:"இருவரும் முடிக்கும் வரை காத்திருக்கிறது...",test:"Test Result ❤️",testNote:"Development test மட்டும்.",share:"உங்கள் Miracle Moment-ஐ பகிருங்கள் ❤️",shot:"Screenshot"}
-};
-const tx=T[language]||T.English;
 
-function applyText(){
- document.getElementById("waitTitle").textContent=tx.waitTitle;
- document.getElementById("waitText").textContent=tx.waitText;
- document.getElementById("statusText").textContent=tx.checking;
- document.getElementById("resultTitle").textContent=tx.resultTitle;
- document.getElementById("resultSub").textContent=tx.resultSub;
- document.getElementById("overallLabel").textContent=tx.overall;
- document.getElementById("refreshBtn").textContent=tx.refresh;
- document.getElementById("testResultBtn").textContent=tx.test;
- document.getElementById("testNote").textContent=tx.testNote;
- document.getElementById("shareTitle").textContent=tx.share;
- document.getElementById("shotText").textContent=tx.shot;
-}
-applyText();
+/* =====================================================
+   MIRACLE QUIZ - PAGE 6
+   FINAL RESULT PAGE
+===================================================== */
 
-function norm(v){return String(v??"").trim().toLowerCase();}
-function compare(guess,actual){
- let n=0;
- for(let i=1;i<=20;i++){const q="q"+i;if(norm(guess?.[q])&&norm(guess?.[q])===norm(actual?.[q]))n++;}
- return n;
+
+/* =====================================================
+   LOCAL INFORMATION
+===================================================== */
+
+const coupleId =
+    localStorage.getItem("coupleId");
+
+const partnerId =
+    localStorage.getItem("partnerId");
+
+const language =
+    localStorage.getItem("language") || "English";
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const waitingCard =
+    document.getElementById("waitingCard");
+
+const resultCard =
+    document.getElementById("resultCard");
+
+const errorBox =
+    document.getElementById("errorBox");
+
+const partner1Name =
+    document.getElementById("partner1Name");
+
+const partner2Name =
+    document.getElementById("partner2Name");
+
+const partner1Score =
+    document.getElementById("partner1Score");
+
+const partner2Score =
+    document.getElementById("partner2Score");
+
+const coupleScore =
+    document.getElementById("coupleScore");
+
+const coupleScoreTotal =
+    document.getElementById("coupleScoreTotal");
+
+const reactionEmoji =
+    document.getElementById("reactionEmoji");
+
+const reactionTitle =
+    document.getElementById("reactionTitle");
+
+const reactionMessage =
+    document.getElementById("reactionMessage");
+
+
+/* =====================================================
+   TRANSLATION
+===================================================== */
+
+function t(en, si, ta){
+
+    if(language === "සිංහල"){
+        return si;
+    }
+
+    if(language === "தமிழ்"){
+        return ta;
+    }
+
+    return en;
 }
-function percent(n){return Math.round(n/20*100);}
-function names(data){
- const a=data?.maleName||localStorage.getItem("malePartnerName")||localStorage.getItem("maleName")||"Partner 1";
- const b=data?.femaleName||localStorage.getItem("femalePartnerName")||localStorage.getItem("femaleName")||"Partner 2";
- return[a,b];
+
+
+function setTranslations(){
+
+    document.getElementById("waitingTitle").textContent =
+        t(
+            "Waiting for your partner ❤️",
+            "ඔබගේ සහකරු/සහකාරිය බලා සිටිමින් ❤️",
+            "உங்கள் துணைக்காக காத்திருக்கிறோம் ❤️"
+        );
+
+    document.getElementById("waitingText").textContent =
+        t(
+            "Your quiz is complete. We are waiting for both partners to finish the Partner Quiz.",
+            "ඔබගේ Quiz එක සම්පූර්ණයි. දෙදෙනාම Partner Quiz එක අවසන් කරන තෙක් අපි බලා සිටිමු.",
+            "உங்கள் Quiz முடிந்தது. இருவரும் Partner Quiz முடிக்கும் வரை காத்திருக்கிறோம்."
+        );
+
+    document.getElementById("resultTitle").textContent =
+        t(
+            "Our Miracle Quiz Result ❤️",
+            "අපේ Miracle Quiz ප්‍රතිඵලය ❤️",
+            "எங்கள் Miracle Quiz முடிவு ❤️"
+        );
+
+    document.getElementById("resultSubtitle").textContent =
+        t(
+            "Let's see how well you know each other!",
+            "ඔබ දෙදෙනා එකිනෙකා කොතරම් හොඳින් දන්නවාද බලමු!",
+            "நீங்கள் ஒருவரை ஒருவர் எவ்வளவு நன்றாக அறிந்திருக்கிறீர்கள் என்று பார்ப்போம்!"
+        );
+
+    document.getElementById("partner1ScoreText").textContent =
+        t(
+            "correct answers",
+            "නිවැරදි පිළිතුරු",
+            "சரியான பதில்கள்"
+        );
+
+    document.getElementById("partner2ScoreText").textContent =
+        t(
+            "correct answers",
+            "නිවැරදි පිළිතුරු",
+            "சரியான பதில்கள்"
+        );
+
+    document.getElementById("coupleScoreLabel").textContent =
+        t(
+            "Our Couple Score",
+            "අපේ Couple Score එක",
+            "எங்கள் Couple Score"
+        );
+
+    document.getElementById("screenshotBtn").textContent =
+        t(
+            "📸 Save Result",
+            "📸 Result එක Save කරන්න",
+            "📸 Result Save செய்யவும்"
+        );
 }
-function band(score){
- if(score<20)return{icon:"😠",en:"A lot more to discover — keep learning about each other ❤️",si:"තව එකිනෙකා ගැන දැනගන්න ගොඩක් දේ තියෙනවා ❤️",ta:"ஒருவரைப் பற்றி ஒருவர் அறிய இன்னும் நிறைய உள்ளது ❤️"};
- if(score<40)return{icon:"😅",en:"A little more practice and attention will help 💕",si:"තව ටිකක් එකිනෙකා ගැන අවධානයෙන් දැනගමු 💕",ta:"இன்னும் கொஞ்சம் ஒருவரை ஒருவர் அறிந்துகொள்ளலாம் 💕"};
- if(score<60)return{icon:"🙂",en:"You are getting to know each other better ❤️",si:"ඔබ දෙදෙනා එකිනෙකා තව හොඳින් දැනගනිමින් ඉන්නවා ❤️",ta:"நீங்கள் ஒருவரை ஒருவர் மேலும் நன்றாக அறிந்து வருகிறீர்கள் ❤️"};
- if(score<75)return{icon:"😊",en:"A sweet connection — keep discovering together 💕",si:"ලස්සන සම්බන්ධතාවයක් — තව දේවල් එකට හොයාගමු 💕",ta:"அழகான இணைப்பு — மேலும் ஒன்றாக அறிந்துகொள்ளுங்கள் 💕"};
- if(score<90)return{icon:"💖",en:"A beautiful romantic connection! ❤️",si:"ලස්සන ආදරණීය බැඳීමක්! ❤️",ta:"அழகான காதல் இணைப்பு! ❤️"};
- return{icon:"💞🏆",en:"Amazing! You know each other beautifully! ❤️",si:"අපූරුයි! ඔබ දෙදෙනා එකිනෙකා ගොඩක් හොඳින් දන්නවා! ❤️",ta:"அற்புதம்! நீங்கள் ஒருவரை ஒருவர் மிகவும் நன்றாக அறிவீர்கள்! ❤️"};
+
+
+/* =====================================================
+   NORMALIZE ANSWER
+===================================================== */
+
+function normalizeAnswer(value){
+
+    if(value === null || value === undefined){
+        return "";
+    }
+
+    return String(value)
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
 }
-function messageFor(score){const b=band(score);return language==="සිංහල"?b.si:language==="தமிழ்"?b.ta:b.en;}
-function confetti(){
- const box=document.getElementById("confetti");box.innerHTML="";
- for(let i=0;i<55;i++){const e=document.createElement("span");e.className="piece";e.textContent=["❤️","💕","✨","💖"][Math.floor(Math.random()*4)];e.style.left=Math.random()*100+"vw";e.style.animationDuration=(3+Math.random()*4)+"s";e.style.animationDelay=(Math.random()*1.5)+"s";box.appendChild(e);}
+
+
+/* =====================================================
+   COMPARE ANSWERS
+===================================================== */
+
+function compareAnswers(
+    guesses,
+    actualAnswers
+){
+
+    let correct = 0;
+
+    for(let i = 1; i <= 20; i++){
+
+        const questionId = "q" + i;
+
+        const guess =
+            normalizeAnswer(
+                guesses?.[questionId]
+            );
+
+        const actual =
+            normalizeAnswer(
+                actualAnswers?.[questionId]
+            );
+
+        if(
+            guess !== "" &&
+            actual !== "" &&
+            guess === actual
+        ){
+            correct++;
+        }
+    }
+
+    return correct;
 }
+
+
+/* =====================================================
+   PERCENT
+===================================================== */
+
+function getPercent(
+    correct,
+    total
+){
+
+    if(!total){
+        return 0;
+    }
+
+    return Math.round(
+        (correct / total) * 100
+    );
+}
+
+
+/* =====================================================
+   REACTION
+===================================================== */
+
+function setReaction(percent){
+
+    let emoji;
+    let title;
+    let message;
+
+
+    if(percent >= 90){
+
+        emoji = "💖";
+
+        title = t(
+            "Perfect Match!",
+            "සුපිරිම ගැලපීමක්!",
+            "சரியான பொருத்தம்!"
+        );
+
+        message = t(
+            "Amazing! You know each other incredibly well. Your connection is truly special ❤️",
+            "අතිවිශිෂ්ටයි! ඔබ දෙදෙනා එකිනෙකා ගැන ඉතා හොඳින් දන්නවා. ඔබේ බැඳීම ඇත්තටම විශේෂයි ❤️",
+            "அற்புதம்! நீங்கள் ஒருவரை ஒருவர் மிகவும் நன்றாக அறிந்திருக்கிறீர்கள். உங்கள் உறவு மிகவும் சிறப்பு ❤️"
+        );
+
+    }
+
+    else if(percent >= 75){
+
+        emoji = "😍";
+
+        title = t(
+            "Amazing Couple!",
+            "අපූරු Couple එකක්!",
+            "அற்புதமான Couple!"
+        );
+
+        message = t(
+            "You know each other very well. There is a beautiful understanding between you ❤️",
+            "ඔබ දෙදෙනා එකිනෙකා ගැන ගොඩක් හොඳින් දන්නවා. ඔබ අතර ලස්සන අවබෝධයක් තියෙනවා ❤️",
+            "நீங்கள் ஒருவரை ஒருவர் மிகவும் நன்றாக அறிந்திருக்கிறீர்கள் ❤️"
+        );
+
+    }
+
+    else if(percent >= 50){
+
+        emoji = "🥰";
+
+        title = t(
+            "Lovely Connection!",
+            "ලස්සන බැඳීමක්!",
+            "அழகான உறவு!"
+        );
+
+        message = t(
+            "You already know a lot about each other, and there is still more to discover together ❤️",
+            "ඔබ දෙදෙනා දැනටමත් එකිනෙකා ගැන ගොඩක් දන්නවා. තව එකිනෙකා ගැන දැනගන්න දේවල් තියෙනවා ❤️",
+            "நீங்கள் ஏற்கனவே ஒருவரைப் பற்றி ஒருவர் நிறைய அறிந்திருக்கிறீர்கள் ❤️"
+        );
+
+    }
+
+    else if(percent >= 25){
+
+        emoji = "😊";
+
+        title = t(
+            "Keep Discovering!",
+            "තවත් එකිනෙකා ගැන දැනගමු!",
+            "மேலும் அறிந்து கொள்ளுங்கள்!"
+        );
+
+        message = t(
+            "Every relationship is a journey. Keep talking, laughing and learning more about each other ❤️",
+            "හැම ආදර සම්බන්ධතාවයක්ම ගමනක්. කතා කරමින්, සිනාසෙමින්, තවත් එකිනෙකා ගැන දැනගන්න ❤️",
+            "ஒவ்வொரு உறவும் ஒரு பயணம். தொடர்ந்து ஒருவரை ஒருவர் அறிந்து கொள்ளுங்கள் ❤️"
+        );
+
+    }
+
+    else{
+
+        emoji = "💞";
+
+        title = t(
+            "A New Adventure!",
+            "අලුත් ආදරණීය ගමනක්!",
+            "ஒரு புதிய பயணம்!"
+        );
+
+        message = t(
+            "There are still many beautiful things to discover about each other. Enjoy the journey together ❤️",
+            "ඔබ දෙදෙනාට එකිනෙකා ගැන තවත් ලස්සන දේවල් ගොඩක් දැනගන්න තියෙනවා. ඒ ගමන එකට විඳින්න ❤️",
+            "ஒருவரைப் பற்றி ஒருவர் அறிய இன்னும் பல அழகான விஷயங்கள் உள்ளன ❤️"
+        );
+    }
+
+
+    reactionEmoji.textContent =
+        emoji;
+
+    reactionTitle.textContent =
+        title;
+
+    reactionMessage.textContent =
+        message;
+}
+
+
+/* =====================================================
+   GET PARTNER NAMES
+===================================================== */
+
+async function loadPartnerNames(){
+
+    try{
+
+        const response =
+            await fetch(
+                `/api/couples/${encodeURIComponent(coupleId)}/profile/${encodeURIComponent(partnerId)}`,
+                {
+                    cache:"no-store"
+                }
+            );
+
+
+        if(!response.ok){
+            return;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const maleName =
+            data.malePartnerName || "";
+
+        const femaleName =
+            data.femalePartnerName || "";
+
+
+        /*
+            We don't force Male = Partner 1
+            or Female = Partner 2.
+
+            If server result gives names later,
+            those names will override these.
+        */
+
+        if(maleName && femaleName){
+
+            partner1Name.textContent =
+                maleName;
+
+            partner2Name.textContent =
+                femaleName;
+        }
+
+    }
+    catch(error){
+
+        console.error(
+            "Could not load partner names:",
+            error
+        );
+    }
+}
+
+
+/* =====================================================
+   DISPLAY SERVER RESULT
+===================================================== */
+
 function showResult(data){
- const c1=compare(data.partner1Guesses,data.partner2Actual);
- const c2=compare(data.partner2Guesses,data.partner1Actual);
- const p1=percent(c1),p2=percent(c2),overall=Math.round(((p1+p2)/2)*10)/10;
- const [n1,n2]=names(data);
- document.getElementById("name1").textContent=n1;document.getElementById("name2").textContent=n2;
- document.getElementById("score1").textContent=p1+"%";document.getElementById("score2").textContent=p2+"%";
- document.getElementById("correct1").textContent=c1+" / 20 "+tx.correct;document.getElementById("correct2").textContent=c2+" / 20 "+tx.correct;
- document.getElementById("overallScore").textContent=overall+"%";
- document.getElementById("reaction").textContent=band(overall).icon;
- document.getElementById("message").textContent=messageFor(overall);
- document.getElementById("details").textContent=n1+" ❤️ "+n2;
- document.getElementById("waiting").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
- if(p1>=50&&p2>=50)confetti();
+
+    /*
+       This supports the final /result endpoint.
+
+       Preferred server response:
+
+       {
+           ready: true,
+
+           partner1: {
+               name: "...",
+               score: 15
+           },
+
+           partner2: {
+               name: "...",
+               score: 17
+           },
+
+           partner1Score: 15,
+           partner2Score: 17,
+           totalCorrect: 32,
+           totalQuestions: 40,
+           couplePercent: 80
+       }
+    */
+
+
+    let score1 = 0;
+    let score2 = 0;
+
+
+    /* -----------------------------------------
+       SCORE FORMAT 1
+    ----------------------------------------- */
+
+    if(
+        data.partner1Score !== undefined
+    ){
+        score1 =
+            Number(data.partner1Score) || 0;
+    }
+
+
+    if(
+        data.partner2Score !== undefined
+    ){
+        score2 =
+            Number(data.partner2Score) || 0;
+    }
+
+
+    /* -----------------------------------------
+       SCORE FORMAT 2
+    ----------------------------------------- */
+
+    if(
+        data.partner1 &&
+        data.partner1.score !== undefined
+    ){
+        score1 =
+            Number(data.partner1.score) || 0;
+    }
+
+
+    if(
+        data.partner2 &&
+        data.partner2.score !== undefined
+    ){
+        score2 =
+            Number(data.partner2.score) || 0;
+    }
+
+
+    /* -----------------------------------------
+       FALLBACK:
+       If server sends actual answers + guesses
+    ----------------------------------------- */
+
+    if(
+        data.partner1Guesses &&
+        data.partner2Actual
+    ){
+
+        score1 =
+            compareAnswers(
+                data.partner1Guesses,
+                data.partner2Actual
+            );
+    }
+
+
+    if(
+        data.partner2Guesses &&
+        data.partner1Actual
+    ){
+
+        score2 =
+            compareAnswers(
+                data.partner2Guesses,
+                data.partner1Actual
+            );
+    }
+
+
+    /* -----------------------------------------
+       NAMES
+    ----------------------------------------- */
+
+    if(
+        data.partner1 &&
+        data.partner1.name
+    ){
+        partner1Name.textContent =
+            data.partner1.name;
+    }
+
+
+    if(
+        data.partner2 &&
+        data.partner2.name
+    ){
+        partner2Name.textContent =
+            data.partner2.name;
+    }
+
+
+    if(data.partner1Name){
+
+        partner1Name.textContent =
+            data.partner1Name;
+    }
+
+
+    if(data.partner2Name){
+
+        partner2Name.textContent =
+            data.partner2Name;
+    }
+
+
+    /* -----------------------------------------
+       TOTAL
+    ----------------------------------------- */
+
+    const totalCorrect =
+        data.totalCorrect !== undefined
+            ? Number(data.totalCorrect)
+            : score1 + score2;
+
+
+    const totalQuestions =
+        data.totalQuestions !== undefined
+            ? Number(data.totalQuestions)
+            : 40;
+
+
+    const percent =
+        data.couplePercent !== undefined
+            ? Number(data.couplePercent)
+            : getPercent(
+                totalCorrect,
+                totalQuestions
+            );
+
+
+    /* -----------------------------------------
+       DISPLAY
+    ----------------------------------------- */
+
+    partner1Score.textContent =
+        `${score1} / 20`;
+
+    partner2Score.textContent =
+        `${score2} / 20`;
+
+    coupleScore.textContent =
+        `${percent}%`;
+
+    coupleScoreTotal.textContent =
+        t(
+            `${totalCorrect} / ${totalQuestions} correct answers`,
+            `${totalCorrect} / ${totalQuestions} නිවැරදි පිළිතුරු`,
+            `${totalCorrect} / ${totalQuestions} சரியான பதில்கள்`
+        );
+
+
+    setReaction(percent);
+
+
+    waitingCard.style.display =
+        "none";
+
+    errorBox.style.display =
+        "none";
+
+    resultCard.style.display =
+        "block";
 }
-function fakeAnswers(correctCount,offset=0){
- const actual={},guess={};
- for(let i=1;i<=20;i++){actual["q"+i]="answer_"+i;guess["q"+i]=(i<=correctCount)?"answer_"+i:"wrong_"+(i+offset);}
- return{actual,guess};
+
+
+/* =====================================================
+   WAITING MODE
+===================================================== */
+
+function showWaiting(message){
+
+    waitingCard.style.display =
+        "block";
+
+    resultCard.style.display =
+        "none";
+
+    errorBox.style.display =
+        "none";
+
+
+    if(message){
+
+        document.getElementById(
+            "waitingText"
+        ).textContent = message;
+    }
 }
-function demoData(){
- const one=fakeAnswers(17,1),two=fakeAnswers(18,2);
- return{maleName:localStorage.getItem("malePartnerName")||"Partner 1",femaleName:localStorage.getItem("femalePartnerName")||"Partner 2",partner1Actual:one.actual,partner2Actual:two.actual,partner1Guesses:two.guess,partner2Guesses:one.guess,bothCompleted:true};
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+function showError(message){
+
+    errorBox.textContent =
+        message;
+
+    errorBox.style.display =
+        "block";
 }
-function localData(){
- if(!coupleId)return null;
- try{
-  const ids=JSON.parse(localStorage.getItem("couplePartnerIds_"+coupleId)||"[]");
-  if(ids.length<2)return null;
-  const a=ids[0],b=ids[1];
-  const aActual=JSON.parse(localStorage.getItem("page4Answers_"+coupleId+"_"+a)||"null");
-  const bActual=JSON.parse(localStorage.getItem("page4Answers_"+coupleId+"_"+b)||"null");
-  const aGuess=JSON.parse(localStorage.getItem("page5Guesses_"+coupleId+"_"+a)||"null");
-  const bGuess=JSON.parse(localStorage.getItem("page5Guesses_"+coupleId+"_"+b)||"null");
-  const aDone=localStorage.getItem("page5Completed_"+coupleId+"_"+a)==="true";
-  const bDone=localStorage.getItem("page5Completed_"+coupleId+"_"+b)==="true";
-  return(aDone&&bDone&&aActual&&bActual&&aGuess&&bGuess)?{partner1Actual:aActual,partner2Actual:bActual,partner1Guesses:aGuess,partner2Guesses:bGuess,bothCompleted:true}:null;
- }catch(e){return null;}
-}
-let timer=null;
+
+
+/* =====================================================
+   CHECK FINAL RESULT
+===================================================== */
+
+let resultLoaded = false;
+
+let checkingResult = false;
+
+
 async function checkStatus(){
- if(document.getElementById("result").classList.contains("hidden")===false)return;
- if(coupleId){
-  try{
-   const r=await fetch("/api/couples/"+encodeURIComponent(coupleId)+"/quiz-result",{cache:"no-store"});
-   if(r.ok){const data=await r.json();if(data&&data.bothCompleted){showResult(data);return;}}
-  }catch(e){}
- }
- const local=localData();if(local){showResult(local);return;}
- document.getElementById("statusText").textContent=tx.sync;
- if(!coupleId){document.getElementById("errorText").textContent=tx.missing;document.getElementById("errorText").classList.remove("hidden");}
- timer=setTimeout(checkStatus,3000);
-}
-document.getElementById("testResultBtn").addEventListener("click",()=>{if(timer)clearTimeout(timer);showResult(demoData());});
-document.getElementById("refreshBtn").addEventListener("click",()=>location.reload());
 
-async function makeResultImage(){
- const actions=document.getElementById("shareActions"),refresh=document.getElementById("refreshBtn"),shareTitle=document.getElementById("shareTitle");
- actions.style.display="none";refresh.style.display="none";shareTitle.style.display="none";
- try{
-  const canvas=await html2canvas(document.getElementById("result"),{backgroundColor:"#12070a",scale:2,useCORS:true});
-  return await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
- }finally{actions.style.display="";refresh.style.display="";shareTitle.style.display="";}
-}
-async function shareImageOrSave(){
- const blob=await makeResultImage();if(!blob)return;
- const file=new File([blob],"miracle-quiz-result.png",{type:"image/png"});
- if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:"Miracle Quiz ❤️",text:"Our Miracle Quiz result ❤️",files:[file]});}
- else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="miracle-quiz-result.png";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}
-}
-document.getElementById("screenshotBtn").addEventListener("click",()=>shareImageOrSave().catch(()=>{}));
-document.getElementById("facebookBtn").addEventListener("click",async()=>{
- const u=location.protocol.startsWith("http")?location.href:"";
- if(u)window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(u),"_blank","noopener,noreferrer");
- else await shareImageOrSave().catch(()=>{});
-});
-document.getElementById("instagramBtn").addEventListener("click",()=>shareImageOrSave().catch(()=>{}));
+    if(
+        !coupleId ||
+        resultLoaded ||
+        checkingResult
+    ){
+        return;
+    }
 
-checkStatus();
+
+    checkingResult = true;
+
+
+    try{
+
+        const response =
+            await fetch(
+                `/api/couples/${encodeURIComponent(coupleId)}/result`,
+                {
+                    method:"GET",
+                    cache:"no-store",
+                    headers:{
+                        "Accept":"application/json"
+                    }
+                }
+            );
+
+
+        let data = {};
+
+
+        try{
+
+            data =
+                await response.json();
+
+        }
+        catch(error){
+
+            data = {};
+        }
+
+
+        /* =================================================
+           BOTH PARTNERS NOT FINISHED YET
+        ================================================= */
+
+        if(
+            response.status === 409 ||
+            response.status === 202 ||
+            data.ready === false
+        ){
+
+            showWaiting(
+                t(
+                    "Your quiz is complete. Waiting for your partner to finish the Partner Quiz ❤️",
+                    "ඔබගේ Quiz එක සම්පූර්ණයි. ඔබගේ සහකරු/සහකාරිය Partner Quiz එක අවසන් කරන තෙක් බලා සිටිමු ❤️",
+                    "உங்கள் Quiz முடிந்தது. உங்கள் துணை Partner Quiz முடிக்கும் வரை காத்திருக்கிறோம் ❤️"
+                )
+            );
+
+            return;
+        }
+
+
+        /* =================================================
+           ERROR
+        ================================================= */
+
+        if(!response.ok){
+
+            throw new Error(
+                data.message ||
+                "Could not load Miracle Quiz result."
+            );
+        }
+
+
+        /* =================================================
+           READY
+        ================================================= */
+
+        resultLoaded = true;
+
+        showResult(data);
+
+    }
+    catch(error){
+
+        console.error(
+            "Result check error:",
+            error
+        );
+
+
+        showError(
+            t(
+                "Could not load the result. We will try again automatically.",
+                "Result එක ලබාගන්න බැරි වුණා. නැවත ස්වයංක්‍රීයව උත්සාහ කරනවා.",
+                "Result பெற முடியவில்லை. மீண்டும் தானாக முயற்சி செய்கிறோம்."
+            )
+        );
+
+    }
+    finally{
+
+        checkingResult = false;
+    }
+}
+
+
+/* =====================================================
+   AUTO CHECK EVERY 3 SECONDS
+===================================================== */
+
+setInterval(
+    () => {
+
+        if(!resultLoaded){
+            checkStatus();
+        }
+
+    },
+    3000
+);
+
+
+/* =====================================================
+   SCREENSHOT
+===================================================== */
+
+document
+.getElementById("screenshotBtn")
+.addEventListener(
+    "click",
+    async () => {
+
+        try{
+
+            const captureArea =
+                document.getElementById(
+                    "captureArea"
+                );
+
+
+            const canvas =
+                await html2canvas(
+                    captureArea,
+                    {
+                        backgroundColor:"#100609",
+                        scale:2,
+                        useCORS:true
+                    }
+                );
+
+
+            const link =
+                document.createElement("a");
+
+
+            link.download =
+                "miracle-quiz-result.png";
+
+
+            link.href =
+                canvas.toDataURL(
+                    "image/png"
+                );
+
+
+            link.click();
+
+        }
+        catch(error){
+
+            console.error(
+                "Screenshot error:",
+                error
+            );
+
+
+            alert(
+                t(
+                    "Could not save screenshot.",
+                    "Screenshot එක save කරන්න බැරි වුණා.",
+                    "Screenshot save செய்ய முடியவில்லை."
+                )
+            );
+        }
+    }
+);
+
+
+/* =====================================================
+   FACEBOOK SHARE
+===================================================== */
+
+document
+.getElementById("facebookBtn")
+.addEventListener(
+    "click",
+    () => {
+
+        const shareUrl =
+            encodeURIComponent(
+                window.location.href
+            );
+
+
+        const facebookUrl =
+            `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+
+
+        window.open(
+            facebookUrl,
+            "_blank",
+            "width=650,height=500"
+        );
+    }
+);
+
+
+/* =====================================================
+   INSTAGRAM
+===================================================== */
+
+document
+.getElementById("instagramBtn")
+.addEventListener(
+    "click",
+    () => {
+
+        alert(
+            t(
+                "Save your result image first, then share it on Instagram ❤️",
+                "මුලින් Result image එක Save කරලා, පසුව Instagram එකට share කරන්න ❤️",
+                "முதலில் Result image-ஐ Save செய்து பின்னர் Instagram-ல் share செய்யுங்கள் ❤️"
+            )
+        );
+    }
+);
+
+
+/* =====================================================
+   START PAGE
+===================================================== */
+
+if(!coupleId){
+
+    waitingCard.style.display =
+        "none";
+
+
+    showError(
+        t(
+            "Couple information was not found. Please start Miracle Quiz again.",
+            "Couple information හමු වුණේ නැහැ. Miracle Quiz එක නැවත ආරම්භ කරන්න.",
+            "Couple தகவல் கிடைக்கவில்லை. Miracle Quiz-ஐ மீண்டும் தொடங்கவும்."
+        )
+    );
+
+}
+else{
+
+    setTranslations();
+
+    loadPartnerNames();
+
+    checkStatus();
+}
+
 </script>
+
 </body>
 </html>
